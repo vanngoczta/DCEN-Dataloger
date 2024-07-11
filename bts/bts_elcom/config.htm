@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Loadsetting()
+	{
+           // Call the macro
+           webiopi().callMacro("load_networksetting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('mac').value =(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('hostname').value=(rcd.length > 1)? rcd[1] : "";
+				var dhcp=(rcd.length > 2)? rcd[2] : "";
+				if(dhcp=='1')
+					document.getElementById('dhcp').checked = true;
+				document.getElementById('ip').value = (rcd.length > 3)? rcd[3] : "";
+				document.getElementById('gateway').value = (rcd.length > 4)? rcd[4] : "";
+				document.getElementById('mask').value = (rcd.length > 5)? rcd[5] : "";
+				document.getElementById('ipserver').value = (rcd.length > 6)? rcd[6] : "";
+				document.getElementById('portserver').value = (rcd.length > 7)? rcd[7] : "";
+				for(var i=0;i<5;i++)
+				{
+					document.getElementById('tel'+i).value= (rcd.length > i+8)? rcd[i+8] : "";
+					
+				}
+				document.getElementById('mailserver').value=(rcd.length > i+8)? rcd[i+8] : "";
+				document.getElementById('mailport').value=(rcd.length > i+9)? rcd[i+9] : "";
+				document.getElementById('mailfrom').value=(rcd.length > i+10)? rcd[i+10] : "";
+				document.getElementById('mailpass').value=(rcd.length > i+11)? rcd[i+11] : "";
+				document.getElementById('mailto0').value=(rcd.length > i+12)? rcd[i+12] : "";
+				document.getElementById('mailto1').value=(rcd.length > i+13)? rcd[i+13] : "";
+				document.getElementById('mailto2').value=(rcd.length > i+14)? rcd[i+14] : "";
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('mac').value+';';
+		stringval=stringval+document.getElementById('hostname').value+';';
+		if(document.getElementById('dhcp').checked==true)
+			stringval=stringval+'1;';
+		else
+			stringval=stringval+'0;';
+		stringval=stringval+document.getElementById('ip').value+';';
+		stringval=stringval+document.getElementById('gateway').value+';';
+		stringval=stringval+document.getElementById('mask').value+';';
+		stringval=stringval+document.getElementById('ipserver').value+';';
+		stringval=stringval+document.getElementById('portserver').value;
+		for(var i=0;i<5;i++)
+		{
+			stringval=stringval+';'+document.getElementById('tel'+i).value;
+		}
+		stringval=stringval+';'+document.getElementById('username').value+';';
+		stringval=stringval+document.getElementById('newpass').value+';';
+		stringval=stringval+document.getElementById('conpass').value+';';
+		stringval=stringval+document.getElementById('mailserver').value+';';
+		stringval=stringval+document.getElementById('mailport').value+';';
+		stringval=stringval+document.getElementById('mailfrom').value+';';
+		stringval=stringval+document.getElementById('mailpass').value+';';
+		stringval=stringval+document.getElementById('mailto0').value+';';
+		stringval=stringval+document.getElementById('mailto1').value+';';
+		stringval=stringval+document.getElementById('mailto2').value;
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_networksetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+	
+	function Reboot()
+	{
+		webiopi().callMacro("Reboot",[], receiverdatas);
+		document.getElementById('result').innerHTML="Reboot...";
+		Flag=0;
+		alert("Waiting Reboot 10 sec...");
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Loadsetting();" >
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="blue">
+  <tr>
+            <td bgcolor="#666666">
+                <font color="#FFFFFF"><b> NETWORK SETTING</b></font></td>
+        </tr>
+</table>
+
+<div>
+        <label><strong>Network:</strong></label>
+</div>
+  <table width="100%" border="2" align="center">
+      <tr>
+        <td width="50%" bgcolor="#993300"><strong><font color="#FFFFFF">MAC Address:</font></strong></td>
+        <td width="50%"><label></label>
+          <input type="text" name="mac" id="mac" /></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>Host Name:</label>
+        </font></strong></td>
+        <td><input type="text" name="host" id="hostname" /></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">Enable DHCP</font></strong></td>
+        <td><input name="dhcp" type="checkbox"  id="dhcp" onClick="configIPBoxes()"  /></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>IP Address:</label>
+        </font></strong></td>
+        <td><input type="text" name="ip" id="ip" /></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>Gateway :</label>
+        </font></strong></td>
+        <td><input type="text" name="gw" id="gateway" /></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>Subnet Mask:</label>
+        </font></strong></td>
+        <td><input type="text" name="sub" id="mask" /></td>
+      </tr>
+    </table>
+
+<div>
+  <p><strong>Alarm Email Settings: </strong></p>
+  <table width="100%" border="2">
+    <tr>
+      <td width="50%" bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>SMTP Server:</label>
+      </strong></font></td>
+      <td width="50%"><input name="mailserver" type="text" id="mailserver" size="40"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>Port:</strong></font></td>
+      <td><input name="mailport" type="text" value="25" id="mailport" size="4"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>From:</label>
+      </strong></font></td>
+      <td><input name="mailfrom" type="text" id="mailfrom" size="40"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>Pass:</label>
+      </strong></font></td>
+      <td><input name="mailpass" type="password" id="mailpass" size="20"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>To:</label>
+      </strong></font></td>
+      <td><input name="mailto0" type="text" id="mailto0" size="50" /></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>Cc:</label>
+      </strong></font></td>
+      <td><input name="mailto1" type="text" id="mailto1" size="50" /></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>Bcc:</label>
+      </strong></font></td>
+      <td><input name="mailto2" type="text" id="mailto2" size="50" /></td>
+    </tr>
+  </table>
+  <p><strong>Server options: </strong></p>
+  <table width="100%" border="2" align="center">
+    <tr>
+      <td width="50%" bgcolor="#993300"><font color="#FFFFFF"><strong>
+        <label>IP Server:</label>
+      </strong></font></td>
+      <td width="50%"><input name="serv" type="text" id="ipserver" size="50" maxlength="50"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>Port:</strong></font></td>
+      <td><input type="number" name="port" id="portserver" size="6"/></td>
+    </tr>
+  </table>
+  <div>
+    <p><strong>Alarm SMS Settings:</strong></p>
+    <table width="100%" border="2" align="center">
+          <tr>
+            <td width="50%" bgcolor="#993300"><strong><font color="#FFFFFF">
+              <label>Of the user 1:</label>
+            </font></strong></td>
+            <td width="50%"><input name="use1" type="tel" id="tel0" size="15"/></td>
+          </tr>
+          <tr>
+            <td bgcolor="#993300"><strong><font color="#FFFFFF">
+              <label>Of the user 2:</label>
+            </font></strong></td>
+            <td><input name="use2" type="tel"  id="tel1" size="15" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#993300"><strong><font color="#FFFFFF">
+              <label>Of the user 3:</label>
+            </font></strong></td>
+            <td><input name="use3" type="tel" id="tel2" size="15" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#993300"><strong><font color="#FFFFFF">Of the user 4: </font></strong></td>
+            <td><input name="use4" type="tel" id="tel3" size="15" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#993300"><strong><font color="#FFFFFF">
+              <label>Of the user 5:</label>
+            </font></strong></td>
+            <td><input name="use5" type="tel" id="tel4" size="15" /></td>
+          </tr>
+        </table>
+    <p><strong>Change password login:</strong></p>
+    <table width="100%" border="2" >
+      <tr>
+        <td width="50%" bgcolor="#993300"><font color="#FFFFFF"> <strong>Enter Login:</strong></font></td>
+        <td width="50%"><input type="text"  id="username" maxlength="8"/></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><font color="#FFFFFF"><strong>New password:</strong></font></td>
+        <td><input type="password" id="newpass" maxlength="8"/></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><font color="#FFFFFF"><strong>Confirm password:</strong></font></td>
+        <td><input type="password" id="conpass" maxlength="8"/></td>
+      </tr>
+    </table>
+    <p>
+    <span id="result">Loading...</span> </p>
+    <p>
+  <input name="Button1" type="button" onclick="Savesetting()" value="Save Settings" />	
+    </p>
+    <p>
+      <input name="Button2"  type="button" onclick="Reboot()" value="Reboot" />
+      
+    </p>
+  </div>
+</div>
+
+<script language="javascript">
+<!--
+function configIPBoxes() {
+	e = document.forms.config;
+	st = e.dhcp.checked;
+	e.ip.disabled = st;
+	e.gw.disabled = st;
+	e.sub.disabled = st;
+}
+//-->
+</script>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2014 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-V514</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

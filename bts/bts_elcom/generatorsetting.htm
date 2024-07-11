@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_generatorsetting",[], receiverdatas);
+		Flag=0;
+    }
+	//address1,address2,timeoutput3, mesalarm, mesnormal,name10,mode10,name11,mode11...
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+							
+				for(var i=0;i<5;i++)
+				{
+					document.getElementById('close1'+i).value= (rcd.length > i*2)? rcd[i*2] : "";
+					document.getElementById('open1'+i).value = 	(rcd.length > i*2+1)? rcd[i*2+1] : "";	
+					
+				}
+				for(var i=0;i<5;i++)
+				{
+					document.getElementById('close2'+i).value= (rcd.length > i*2+10)? rcd[i*2+10] : "";
+					document.getElementById('open2'+i).value = 	(rcd.length > i*2+11)? rcd[i*2+11] : "";	
+					
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+					
+			}
+		}
+    }
+	//Load cac du lieu cai dat
+	function Loadsetting()
+	{
+		// Call the macro
+        webiopi().callMacro("load_generatorsetting",[], receiverdatas);
+		document.getElementById('result').innerHTML="Loaded Setting";
+		Flag=0;
+		
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<5;i++)
+		{
+			if(document.getElementById('close1'+i).value)
+			{
+				names=document.getElementById('close1'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+			if(document.getElementById('open1'+i).value)
+			{
+				names=document.getElementById('open1'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+		}
+		for(var i=0;i<5;i++)
+		{
+			if(document.getElementById('close2'+i).value)
+			{
+				names=document.getElementById('close2'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+			if(document.getElementById('open2'+i).value)
+			{
+				names=document.getElementById('open2'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_generatorsetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();">
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatormonitor.htm" style="text-decoration:none"><font size="4"><strong>Generator Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="airconsetting.htm" style="text-decoration:none"><font size="4"><strong>Air Con Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokesetting.htm" style="text-decoration:none"><font size="4"><strong>Smoke Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>GENERATOR SETTING (không báo ra loa còi)</b></font></td></tr>		
+</table>
+
+    <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>INPUT</strong></td>
+        <td bgcolor="#CCCCCC"><strong>CLOSE MESSAGE</strong></td>
+        <td bgcolor="#CCCCCC"><strong>OPEN MESSAGE</strong></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>MODULE 1</strong></td>
+      </tr>
+      <tr align="center" id="channel0">
+        <td><strong>1</strong></td>
+        <td><input name="namechannel10" id="close10" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open10" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel1">
+        <td><strong>2</strong></td>
+        <td><input name="namechannel11" id="close11" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open11" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel2">
+        <td><strong>3</strong></td>
+        <td><input name="namechannel12" id="close12" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open12" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel3">
+        <td><strong>4</strong></td>
+        <td><input name="namechannel13" id="close13" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open13" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel4">
+        <td><strong>5</strong></td>
+        <td><input name="namechannel14" id="close14" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open14" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>MODULE 2</strong></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>1</strong></td>
+        <td><input name="namechannel10" id="close20" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open20" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel11">
+        <td><strong>2</strong></td>
+        <td><input name="namechannel11" id="close21" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open21" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td><strong>3</strong></td>
+        <td><input name="namechannel12" id="close22" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open22" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel13">
+        <td><strong>4</strong></td>
+        <td><input name="namechannel13" id="close23" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open23" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td><strong>5</strong></td>
+        <td><input name="namechannel14" id="close24" type="text" maxlength="18" /></td>
+        <td><input name="namechannel10" id="open24" type="text" maxlength="18" /></td>
+      </tr>
+    </table>
+  <p><span id="result"></span></p>
+    <p>
+      <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+	</p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

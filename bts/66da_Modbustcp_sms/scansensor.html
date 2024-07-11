@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>SCAN SENSOR ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_ScanSensor",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				for(var i=0;i<4;i++)
+				{
+					var name= (rcd.length > i*5+0)? rcd[i*5+0] : "";
+					var serial= (rcd.length > i*5+1)? rcd[i*5+1] : "";
+					var address= (rcd.length > i*5+2)? rcd[i*5+2] : "";
+					var sensorunits= (rcd.length > i*5+3)? rcd[i*5+3] : "";
+					var tempunits= (rcd.length > i*5+4)? rcd[i*5+4] : "";
+					if(document.getElementById('name'+i) && i==0)
+						document.getElementById('name'+i).innerHTML = "<a href=dosetup.htm>"+name+"</a>";
+					else
+					if(document.getElementById('name'+i) && i==1)
+						document.getElementById('name'+i).innerHTML = "<a href=dcsetup.htm>"+name+"</a>";
+						
+					else
+					if(document.getElementById('name'+i) && i==2)
+						document.getElementById('name'+i).innerHTML = "<a href=phsetup.htm>"+name+"</a>";
+					else
+					if(document.getElementById('name'+i) && i==3)
+						document.getElementById('name'+i).innerHTML = "<a href=ulsetup.htm>"+name+"</a>";
+						
+					else
+					if(document.getElementById('name'+i) && i==4)
+						document.getElementById('name'+i).innerHTML = "<a href=masetup.htm>"+name+"</a>";
+							
+					if(document.getElementById('serial'+i))
+						document.getElementById('serial'+i).innerHTML = serial	  ;
+					
+					if(document.getElementById('add'+i))
+						document.getElementById('add'+i).innerHTML = address	  ;
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Scanning...";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Doc du lieu cam bien
+	function Read()
+	{
+		if(Flag<2)
+			return;
+        // Call the macro
+        webiopi().callMacro("run_ScanSensor",[], receiverdatas);
+		document.getElementById('result').innerHTML="Scanning...";
+		setTimeout(callMacro_Listevents,10000);
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666" width="50%"><font color="#FFFFFF"><b>SCAN SENSOR</b></font></td>
+      </tr>		
+</table>
+<span id="result"></span>	
+  <table width="100%"  border="0" id="diagtest2">
+    <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Index</strong></td>
+      <td bgcolor="#CCCCCC"><strong>Name Sensor</strong></td>
+      <td   bgcolor="#CCCCCC"><strong>Serial </strong></td>
+      <td bgcolor="#CCCCCC"><strong>Address</strong></td>
+    </tr>
+    <tr align="center">
+      <td>1</td>
+      <td><span id='name0'></span></td>
+      <td><span id='serial0'></span></td>
+      <td><span id='add0'></span></td>
+    </tr>
+    <tr align="center">
+      <td>2</td>
+      <td><span id='name1'></span></td>
+      <td><span id='serial1'></span></td>
+      <td><span id='add1'></span></td>
+    </tr>
+    <tr align="center">
+      <td>3</td>
+      <td><span id='name2'></span></td>
+      <td><span id='serial2'></span></td>
+      <td><span id='add2'></span></td>
+    </tr>
+    <tr align="center">
+      <td>4</td>
+      <td><span id='name3'></span></td>
+      <td><span id='serial3'></span></td>
+      <td><span id='add3'></span></td>
+    </tr>
+    <tr align="center">
+    	<td>5</td>
+      <td><span id='name4'></span></td>
+      <td><span id='serial4'></span></td>
+      <td><span id='add4'></span></td>
+    </tr>
+  </table>
+  <p>
+    <input name="Button" type="button" onclick="Read()" value="Read Devices" />
+  </p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V316</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,44 @@
+1
+1
+24
+10
+10
+10
+20
+0
+30
+10
+90
+Low Alarm
+High Alarm
+0
+2
+Hong ngoai bao dong IN1
+Hong ngoai binh thuong IN1
+1
+0
+2
+Bao dong mo cua IN2
+Bao dong dong cua IN2
+1
+0
+2
+Bao dong khoi IN3
+Bao khoi binh thuong IN3
+1
+0
+2
+Bao dong nhiet tang IN4
+Nhiet do binh thuong IN4
+1
+0
+2
+Bao dong ngap nuoc IN5
+Dau bao nuoc binh thuong IN5
+1
+0
+2
+Bao dong vo kinh IN6
+Dau bao kinh binh thuong IN6
+1
+0

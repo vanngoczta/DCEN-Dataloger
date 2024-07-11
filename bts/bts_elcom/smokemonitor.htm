@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Smoke Alarm ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+	function callMacro_UpdateMonitor()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_smokestatus",[], receiverdatas);
+		Flag=0;
+    }
+	//Nhan thong tin nhu module co ket noi hay khong ?, trang thai dang dong = 1 hay dang mo = 0
+	//connect1,inputsmoke1, connect2, inputsmoke2
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split(',');
+			if (rcd.length >= 1) 
+			{
+				//Module 1
+				connect1=	(rcd.length > 0)? rcd[0] : "";
+				input1= (rcd.length > 1)? rcd[1] : "";	
+				//------------------------------------
+				if(connect1==0)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Not connect";
+				else if(connect1==1)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Connecting";
+				else if(connect1==2 || connect1==3)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Alarm";
+				//-----------------------------------------
+				var baochay1bin=Number(input1).toString(2);
+				var baochay1binstr=baochay1bin.split('');
+				for(j=0;j<10;j++)
+				{	
+					var bits=(baochay1binstr.length > (baochay1binstr.length-j-1))? baochay1binstr[baochay1binstr.length-j-1]: "";
+					if(bits==document.getElementById('mode1'+j).value)
+						document.getElementById('colorsmoke1'+j).bgColor="red";	
+					else
+						document.getElementById('colorsmoke1'+j).bgColor="white";
+				}
+				
+				//Module 2
+				connect2=	(rcd.length > 2)? rcd[2] : "";
+				input2= (rcd.length > 3)? rcd[3] : "";	
+				//------------------------------------
+				if(connect2==0)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Not connect";
+				else if(connect2==1)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Connecting";
+				else if(connect2==2 || connect1==3)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Alarm";	
+				//---------------------------------------
+				var baochay2bin=Number(input2).toString(2);
+				var baochay2binstr=baochay2bin.split('');
+				for(j=0;j<10;j++)
+				{	
+					var bits=(baochay2binstr.length > (baochay2binstr.length-j-1))? baochay2binstr[baochay2binstr.length-j-1]: "";
+					if(bits==document.getElementById('mode2'+j).value)
+						document.getElementById('colorsmoke2'+j).bgColor="red";	
+					else
+						document.getElementById('colorsmoke2'+j).bgColor="white";
+				}	
+			}
+		}
+    }
+
+	//Nhan trang thai cua cac module
+	function callMacro_UpdateModule()
+    {
+       // Get data from macro
+	   	webiopi().callMacro("UpdateModuleSmoke", [], receiverUpdateModuleSmoke);
+	}
+	//Doc ban tin cac module
+	//Mes0,Mode0,Mes1,Mode1....
+	function receiverUpdateModuleSmoke(macro, args, response) 
+	{
+		if (response != null) 
+		{
+			var rcd = response.split(',');
+			if (rcd.length >= 1) 
+			{
+				for (var i = 0; i < 10; i++) 
+				{
+				
+					if(document.getElementById('messmoke1'+i))
+						document.getElementById('messmoke1'+i).innerHTML=(rcd.length > i*2)? rcd[i*2] : "";
+					if(document.getElementById('mode1'+i))
+					{	
+						document.getElementById('mode1'+i).value=(rcd.length > i*2+1)? rcd[i*2+1] : "";
+						if(document.getElementById('mode1'+i).value=='2')
+							document.getElementById('channel1'+i).style.display="none";
+					}
+				}
+				for (var i = 0; i < 10; i++) 
+				{
+					if(document.getElementById('messmoke2'+i))
+						document.getElementById('messmoke2'+i).innerHTML=(rcd.length > i*2+20)? rcd[i*2+20] : "";
+					if(document.getElementById('mode2'+i))
+					{	
+						document.getElementById('mode2'+i).value=(rcd.length > i*2+21)? rcd[i*2+21] : "";
+						if(document.getElementById('mode2'+i).value=='2')
+							document.getElementById('channel2'+i).style.display="none";
+					}
+				}
+			}
+		}
+	}
+	
+</script>
+<body bgcolor="white" onload="callMacro_UpdateModule();">
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokemonitor.htm" style="text-decoration:none"><font size="4"><strong>Smoke Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="aircontrol.htm" style="text-decoration:none"><font size="4"><strong>Air Control</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatormonitor.htm" style="text-decoration:none"><font size="4"><strong>Generator Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokesetting.htm" style="text-decoration:none"><font size="4"><strong>Smoke Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>SMOKE SENSOR MONITOR (white: normal, red: alarm)</b></font></td></tr>		
+</table>
+
+  <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>INPUT</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Smoke Sensor Name</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Select Mode</strong></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong><span id='connectmodule1'>MODULE 1</span></strong></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>1</strong></td>
+        <td id='colorsmoke10'><center>
+          <span id='messmoke10'></span>
+        </center></td>
+        <td><select name="mode0" id="mode10">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel11">
+        <td><strong>2</strong></td>
+        <td id='colorsmoke11'><center>
+          <span id='messmoke11'></span>
+        </center></td>
+        <td><select name="mode1" id="mode11">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td><strong>3</strong></td>
+        <td id='colorsmoke12'><center>
+          <span id='messmoke12'></span>
+        </center></td>
+        <td><select name="mode2" id="mode12">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel13">
+        <td><strong>4</strong></td>
+        <td id='colorsmoke13'><center>
+          <span id='messmoke13'></span>
+        </center></td>
+        <td><select name="mode3" id="mode13">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td><strong>5</strong></td>
+        <td id='colorsmoke14'><center>
+          <span id='messmoke14'></span>
+        </center></td>
+        <td><select name="mode4" id="mode14">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel15">
+        <td><strong>6</strong></td>
+        <td id='colorsmoke15'><center>
+          <span id='messmoke15'></span>
+        </center></td>
+        <td><select name="mode5" id="mode15">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel16">
+        <td><strong>7</strong></td>
+        <td id='colorsmoke16'><center>
+          <span id='messmoke16'></span>
+        </center></td>
+        <td><select name="mode6" id="mode16">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel17">
+        <td><strong>8</strong></td>
+        <td id='colorsmoke17'><center>
+          <span id='messmoke17'></span>
+        </center></td>
+        <td><select name="mode7" id="mode17">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel18">
+        <td><strong>9</strong></td>
+        <td id='colorsmoke18'><center>
+          <span id='messmoke18'></span>
+        </center></td>
+        <td><select name="mode8" id="mode18">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel19">
+        <td><strong>10</strong></td>
+        <td id='colorsmoke19'><center>
+          <span id='messmoke19'></span>
+        </center></td>
+        <td><select name="mode9" id="mode19">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong><span id='connectmodule2'>MODULE 2</span></strong></td>
+      </tr>
+      <tr align="center" id="channel20">
+        <td><strong>1</strong></td>
+        <td id='colorsmoke20'><center>
+          <span id='messmoke20'></span>
+        </center></td>
+        <td><select name="mode10" id="mode20">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel21">
+        <td><strong>2</strong></td>
+        <td id='colorsmoke21'><center>
+          <span id='messmoke21'></span>
+        </center></td>
+        <td><select name="mode11" id="mode21">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel22">
+        <td><strong>3</strong></td>
+        <td id='colorsmoke22'><center>
+          <span id='messmoke22'></span>
+        </center></td>
+        <td><select name="mode12" id="mode22">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel23">
+        <td><strong>4</strong></td>
+        <td id='colorsmoke23'><center>
+          <span id='messmoke23'></span>
+        </center></td>
+        <td><select name="mode13" id="mode23">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel24">
+        <td><strong>5</strong></td>
+        <td id='colorsmoke24'><center>
+          <span id='messmoke24'></span>
+        </center></td>
+        <td><select name="mode14" id="mode24">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel25">
+        <td><strong>6</strong></td>
+        <td id='colorsmoke25'><center>
+          <span id='messmoke25'></span>
+        </center></td>
+        <td><select name="mode15" id="mode25">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel26">
+        <td><strong>7</strong></td>
+        <td id='colorsmoke26'><center>
+          <span id='messmoke26'></span>
+        </center></td>
+        <td><select name="mode16" id="mode26">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel27">
+        <td><strong>8</strong></td>
+        <td id='colorsmoke27'><center>
+          <span id='messmoke27'></span>
+        </center></td>
+        <td><select name="mode17" id="mode27">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel20">
+        <td><strong>9</strong></td>
+        <td id='colorsmoke28'><center>
+          <span id='messmoke28'></span>
+        </center></td>
+        <td><select name="mode18" id="mode28">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel29">
+        <td><strong>10</strong></td>
+        <td id='colorsmoke29'><center>
+          <span id='messmoke29'></span>
+        </center></td>
+        <td><select name="mode10" id="mode29">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+    </table>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

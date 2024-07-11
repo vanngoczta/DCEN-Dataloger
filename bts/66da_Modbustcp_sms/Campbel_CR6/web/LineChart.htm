@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ECA-GPIs6.6DA</title>
+</head>
+<body bgcolor="white" onload="startTime()" >
+<div align="left"><b>MONITORING SYSTEM</b> </div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+<tr bgcolor="#FF0000" fgcolor="white">
+<td  height="23" bgcolor="#666666">
+<font color="#FFFFFF"><b> HISTORY CHART</b></font>
+<font color="#FF0000"><span id="Channel" style="text-align: center; ">285028</span></font>
+<font color="#FF0000"> : <span id="numberchannel" style="text-align: center; ">4</span></font>
+</td>
+</tr>
+</table>
+		<div><a href="JavaScript:window.print()"><img src="print.gif" border="0" /></a></div>	
+	    <table width="100%" border="2" align="left">
+         <tr>
+             <td width="50%" bordercolor="#ECE9D8" bgcolor="#996600"><font color="#FFFFFF"><strong>Get median of x minutes, valid values: </strong></font></td>
+             <td width="50%">
+               <div align="left">
+                 <p>
+                   <select name="Select" id="select_median">
+                   	 <option value="1">1</option>
+                     <option value="10">10</option>
+                     <option value="30">30</option>
+                     <option value="60">60</option>
+                     <option value="240">240</option>
+                     <option value="720">720</option>
+                   </select>
+                 </p>
+				 
+               </div></td>
+          </tr>
+           <tr>
+             <td width="440" bordercolor="#ECE9D8" bgcolor="#996600"><font color="#FFFFFF"><strong>Days To Include In Feed (1 - 9):</strong></font></td>
+             <td width="440">
+               <div align="left">
+                 <p>
+                   <input name="day" type="number" id="day" value="1" max="10" />
+                   <input name="Button" type="button" onClick="drawChart()" value="Days Chart" id="button1">
+				   <input name="Button" type="button" onClick="downloadday()" value="Download" id="button1download">
+                 </p>
+				 
+               </div></td>
+           </tr>
+           <tr>
+             <td height="28" bordercolor="#ECE9D8" bgcolor="#996600"><strong><font color="#FFFFFF">Start Date - End Date (YYYY-MM-DD) :</font></strong></td>
+             <td>
+               <div align="left">
+                 <p>
+                   <input name="startdate" type="date" id="startdate" />
+                   <input name="enddate" type="date" id="enddate"  />
+                   <input name="Button" type="button" onClick="drawChartdate()" value="Date Chart" id="button2">
+				   <input name="Button" type="button" onClick="downloaddate()" value="Download" id="button2download">
+   				</p>
+               </div></td>
+           </tr>
+    </table>
+	
+	    <p>
+	    <script>
+		//--------------------------------
+	function checkTime(i) {
+		if (i<10) {i = "0" + i} // add zero in front of numbers < 10
+		return i;
+	}
+	function startTime() {
+		var today=new Date();
+		var h=today.getHours();
+		var m=today.getMinutes();
+		var s=today.getSeconds();
+		h = checkTime(h); 
+		m = checkTime(m);
+		s= checkTime(s);
+		day = today.getDate();
+		if (day <10)
+		  day = "0" + day;
+		month = today.getMonth() + 1;
+		if (month < 10)
+		  month = "0" + month;
+		year = today.getFullYear();
+		document.getElementById('startdate').value =year + "-" + month + "-" + day;
+		document.getElementById('enddate').value = year + "-" + month + "-" + day ;
+		drawChart();
+	}
+		function drawChart()
+		{
+			var tableData="";
+			var channel = document.getElementById('Channel').innerHTML;		//3175
+			var numberchannel=Number(document.getElementById('numberchannel').innerHTML)+1;
+				if(numberchannel>9)
+					numberchannel=9;
+			if(document.getElementById('select_median').value=="1")
+			{
+				for (var i = 1; i < numberchannel; i++)
+				{
+					tableData += "<iframe width=\"49.8%\" height=\"250\"  style=\"border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/";
+					tableData += channel+ "/charts/" + i + "?days=" + document.getElementById('day').value + "\"></iframe>";
+				}
+			}
+			else
+			{
+				for (var i = 1; i < numberchannel; i++)
+				{
+					tableData += "<iframe width=\"49.8%\" height=\"250\"  style=\"border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/";
+					tableData += channel+ "/charts/" + i + "?days=" + document.getElementById('day').value + "&median="+ document.getElementById('select_median').value+  "\"></iframe>";
+				}
+			}
+			
+			document.getElementById("ChartGraph").innerHTML=tableData;
+		}	
+		function downloadday()
+		{
+			var tableData="";
+			var channel = document.getElementById('Channel').innerHTML;		//3175
+			tableData  = "http://api.thingspeak.com/channels/";
+			if(document.getElementById('select_median').value=="1")
+			{
+				tableData += channel+ "/feed.csv" + "?days=" + document.getElementById('day').value+"&offset=7";
+			}
+			else
+			{
+				tableData += channel+ "/feed.csv" + "?days=" + document.getElementById('day').value+ "&median=" + document.getElementById('select_median').value+"&offset=7";
+			}
+			var str = "Download file data feed.csv"+" days=" + document.getElementById('day').value;
+			document.write(str.link(tableData));
+		}
+		function drawChartdate()
+		{
+			var tableData="";
+			var channel = document.getElementById('Channel').innerHTML;		//3175
+			var numberchannel=Number(document.getElementById('numberchannel').innerHTML)+1;
+			if(numberchannel>9)
+				numberchannel=9;
+			if(document.getElementById('select_median').value=="1")
+			{
+				for (var i = 1; i < numberchannel; i++)
+				{
+					tableData += "<iframe width=\"49.8%\" height=\"250\"  style=\"border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/";
+					tableData += channel+ "/charts/" + i + "?start=" + document.getElementById('startdate').value + "%2000:00:00&end=" + document.getElementById('enddate').value + "%2000:00:00" + "\"></iframe>";
+				}
+			}
+			else
+			{
+				for (var i = 1; i < numberchannel; i++)
+				{
+					tableData += "<iframe width=\"49.8%\" height=\"250\"  style=\"border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/";
+					tableData += channel+ "/charts/" + i + "?start=" + document.getElementById('startdate').value + "%2000:00:00&end=" + document.getElementById('enddate').value + "%2000:00:00" + "&median="+ document.getElementById('select_median').value + "\"></iframe>";
+				}
+			}
+			document.getElementById("ChartGraph").innerHTML=tableData;
+		}	
+		function downloaddate()
+		{
+			var tableData="";
+			var channel = document.getElementById('Channel').innerHTML;		//3175
+			tableData  = "http://api.thingspeak.com/channels/";
+			if(document.getElementById('select_median').value=="1")
+			{
+				tableData += channel+ "/feed.csv" + "?start=" + document.getElementById('startdate').value + "%2000:00:00&end=" + document.getElementById('enddate').value + "%2000:00:00&offset=7";
+			}
+			else
+			{
+				tableData += channel+ "/feed.csv" + "?start=" + document.getElementById('startdate').value + "%2000:00:00&end=" + document.getElementById('enddate').value + "%2000:00:00" + "&median="+ document.getElementById('select_median').value+"&offset=7";
+			}
+			var str = "Download file data feed.csv"+" start=" + document.getElementById('startdate').value + " end=" + document.getElementById('enddate').value;
+			document.write(str.link(tableData));
+		}
+	    </script>
+</p>
+	    <p  align="left" id="ChartGraph"></p>
+</body>
+</html>

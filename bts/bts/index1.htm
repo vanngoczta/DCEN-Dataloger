@@ -1,0 +1,766 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Home DCEN Dataloger 1.0</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-image: url(backgro.jpg);
+}
+div.u1{
+	position: absolute;
+	right: 2%;
+	left: 50%;
+
+}
+div.u2{
+	position: absolute;
+	right: 2%;
+	left: 50%;
+	top: 50%;
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+	var flagbg=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var flag=0;
+	var audio = new Audio('ALARM.mp3');
+	// Following function will process data received from 
+	// Dieu khien loi ra 1
+	function Output(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("Output", index, ReceiverUpdateMonitor);
+    }
+	function ModeOutput(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("ModeOutput", index, ReceiverUpdateMonitor);
+    }
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+  	function callMacro_UpdateMonitor()
+    {
+       // Get data from macro
+       if(flag==0)
+	   {	flag=1;
+	   		webiopi().callMacro("UpdateMonitor", [], ReceiverUpdateMonitor);
+	   }
+	   else if(flag==1)
+	   {	flag=2;
+	   		webiopi().callMacro("load_alarm_tablet_index",[], receiveralarms);
+	   }
+	   else if(flag==2)
+	   {	flag=0;
+	   		webiopi().callMacro("UpdateStatus",[], receiverUpdateStatus);
+	   }
+	  
+	}
+	//------------------------------------------------------------
+	function receiverUpdateStatus(macro, args, response) 
+	{
+		var rcd = response.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	
+						
+						document.getElementById('namestation').innerHTML=(fld.length > 0)? fld[0] : "";
+						alarmstatus=(fld.length > 1)? fld[1] : "";
+						if(alarmstatus=="ARMED")
+							document.getElementById('alarmstation').innerHTML="Đang BẬT";
+						else if(alarmstatus=="DISARMED")
+							document.getElementById('alarmstation').innerHTML="Đang TẮT";
+						document.getElementById('reportgsm').innerHTML=(fld.length > 2)? fld[2] : "";
+						document.getElementById('reportserver').innerHTML=(fld.length > 3)? fld[3] : "";
+						document.getElementById('reporthmi').innerHTML=(fld.length > 4)? fld[4] : "";
+						var homemode=(fld.length > 5)? fld[5] : "";
+						if(homemode=='1')
+							document.getElementById('homemode').style.display="none";
+						document.getElementById('timer').innerHTML=Date();
+					}
+				}
+			}
+		}
+	}
+	//------------------------------------------------------------
+	// Following function will process data received from set/getLightHours macro.
+	
+    function receiveralarms(macro, args, response) 
+	{
+            // Following lines use jQuery functions
+			AlarmDataTable(response);
+    }
+	function ReceiverUpdateMonitor(macro, args, response) 
+	{
+            // Following lines use jQuery functions
+			//var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response);
+    }
+	//Thuc hien onload
+	function callMacro_Listalarms()
+	{
+           // Call the macro
+           webiopi().callMacro("load_alarm_data",[], receiveralarms);
+    }
+	//Gui lenh ma dac biet
+	function SendCusd()
+	{		
+		// Arguments sent to the macro
+        var index = [$("#cusd").val()];
+		// Call the macro
+        webiopi().callMacro("SendCusd",index, receivercusd);
+		
+	}
+	function receivercusd(macro, args, response) 
+	{
+        // Following lines use jQuery functions
+		document.getElementById('readcusd').innerHTML=response;
+    }
+	//------------------------------------------------------------
+    // convenience: wrap value in specified font
+    function setFont(val, face, size) {
+        var s = "<font color=\"#FFFFFF\"";
+        s += " face='" + face + "'";
+        s += "size=" + size;
+        s += ">";
+        s += val;
+        s += "</font>";
+        return s;
+    }
+    
+    // convenience: set header font
+    function hdrFont(val) {
+       return "<center><b>" + setFont(val, "arial", 3) + "</b></center>";
+    }
+    
+    // convenience: set data font
+    function dtaFont(val) {
+       return "<center><font size='3' face=\"arial\">" + val + "</font></center>";
+    }
+		function getWindowHeight() {
+        var winHeight = 0;
+        if (typeof(window.innerWidth) == 'number') {
+            // Non-IE
+            winHeight = window.innerHeight; // innerWidth
+        } else 
+        if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+            // IE 6+ in 'standards compliant mode'
+            winHeight = document.documentElement.clientHeight; // clientWidth
+        } else 
+        if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+            //IE 4 compatible
+            winHeight = document.body.clientHeight; // clientWidth
+        }
+        //window.alert( 'Height = ' + winHeight);
+        return winHeight;
+    }
+	// return the absolute Y offset of an object (relative to page
+    function getAbsoluteOffsetTop(obj) {
+        var absTop = 0;
+        if (obj.offsetParent) {
+            for (; obj.offsetParent; obj = obj.offsetParent) {
+                absTop += obj.offsetTop;
+            }
+        } else
+        if (obj.y) {
+            absTop += obj.y;
+        }
+        return absTop;
+    }
+	 // on resize
+    function resizeTable() {
+        var dataTableDiv = document.getElementById('data_table_div');
+        var last_hr      = document.getElementById('last_hr');
+        var winHeight    = getWindowHeight();
+        var dataHeight   = (winHeight - last_hr.clientHeight) - getAbsoluteOffsetTop(dataTableDiv) - 30;
+        //alert("Table height: [" + getAbsoluteOffsetTop(dataTableDiv) + "] " + dataHeight);
+        if (dataHeight > 30) {
+            dataTableDiv.style.height = dataHeight + "px";
+        } else {
+            dataTableDiv.style.height = "auto";
+        }
+    }
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function AlarmDataTable(text)
+{	
+
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+						var id			= 	(fld.length > 0)? fld[0] : "";
+						var date		= 	(fld.length > 1)? fld[1] : "";
+						var time  		= 	(fld.length > 2)? fld[2] : "";
+						var eventalarm	= 	(fld.length > 3)? fld[3] : "";
+						var meslow=(fld.length > 4)? fld[4] : "";
+						var meshigh=(fld.length > 5)? fld[5] : "";
+					    var input=(fld.length > 6)? fld[6] : "";
+						var output=(fld.length > 7)? fld[7] : "";
+						var modeoutput=(fld.length > 8)? fld[8] : "";
+						if(i<6)
+						{
+							document.getElementById('id'+i).innerHTML=id;
+							document.getElementById('date'+i).innerHTML=date;
+							document.getElementById('time'+i).innerHTML=time;
+							document.getElementById('event'+i).innerHTML=eventalarm;
+							//document.getElementById('low'+i).innerHTML=meslow;
+							//document.getElementById('high'+i).innerHTML=meshigh;
+							if(input=='1')
+							{	document.getElementById('tdinput'+i).style.color="black";
+								document.getElementById('input'+i).innerHTML=meshigh;
+							}
+							else
+							{	document.getElementById('tdinput'+i).style.color="gray";
+								document.getElementById('input'+i).innerHTML=meslow;
+							}
+							if(output=='1')
+							{	
+								
+								if(i==2)
+								{
+									document.getElementById('out'+i).style.color="red";	
+									audio.play();
+								}
+								else
+									document.getElementById('out'+i).style.color="black";
+							}
+							else
+							{	
+								document.getElementById('out'+i).style.color="gray";
+								if(i==2)
+								{	
+									audio.pause();
+								}
+							}
+							if(modeoutput=='1')
+							{	
+								if(i==3)
+								{	
+									document.getElementById('modeout'+i).innerHTML='Luân phiên';
+									document.getElementById('out'+i).value="Điều hòa 3"
+								}
+								else
+									document.getElementById('modeout'+i).innerHTML='Bằng tay';
+								document.getElementById('modeout'+i).style.color="black";
+							}
+							else
+							{	
+								if(i==0 || i==1)
+									document.getElementById('modeout'+i).innerHTML='Luân phiên';
+								else
+									document.getElementById('modeout'+i).innerHTML='Tự động';
+								document.getElementById('modeout'+i).style.color="gray";
+							}
+						}
+					}
+				}
+			}		
+		}
+	}
+	return true;
+}
+// Chay file am thanh
+function playSound(el,soundfile) 
+{
+	if (el.mp3) 
+	{
+		if(el.mp3.paused) 
+			el.mp3.play();
+        else 
+			el.mp3.pause();
+    } else {
+        el.mp3 = new Audio(soundfile);
+        el.mp3.play();
+    }
+}
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function populateDataTable(text)
+{	// the following limits the number of 'pushPins' placed on the map to the last MAX_PUSH_PINS points.
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < 24; i++) 
+			{
+				if (i<rcd.length) 
+				{	
+					if(rcd[i].trim() != "")
+					{
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+							var time		  = 	(fld.length > 0)? fld[0] : "";
+							var channel		=  (fld.length > 1)? fld[1] : "";
+							var name 		 = 	(fld.length > 2)? fld[2] : "";
+							var value  		= 	(fld.length > 3)? fld[3] : "";
+							var units  		= 	(fld.length > 4)? fld[4] : "";
+							var status  		= 	(fld.length > 5)? fld[5] : "";
+							var strstatus="";
+							if(status==0)
+							{	strstatus="Not connect";
+								document.getElementById('statusc'+i).style.color="gray";
+							}
+							else if(status==1)
+							{
+								strstatus="Connected";
+								document.getElementById('statusc'+i).style.color="black";
+							}
+							else if(status==2)
+							{	
+								strstatus="Low Alarm";
+								if(flagbg[i]==0)
+								{
+									document.getElementById('statusc'+i).style.color="yellow";
+									flagbg[i]=1;
+								}
+								else
+								{
+									document.getElementById('statusc'+i).style.color="green";
+									flagbg[i]=0;
+								}
+							}
+							else if(status==3)
+							{	
+								strstatus="High Alarm";
+								if(flagbg[i]==0)
+								{
+									document.getElementById('statusc'+i).style.color="red";
+									flagbg[i]=1;
+								}
+								else
+								{
+									document.getElementById('statusc'+i).style.color="white";
+									flagbg[i]=0;
+								}
+							}	
+							document.getElementById('timec'+i).innerHTML=dtaFont(time);
+							document.getElementById('channelc'+i).innerHTML=dtaFont(channel);
+							document.getElementById('namec'+i).innerHTML=dtaFont(name);
+							document.getElementById('valuec'+i).innerHTML=dtaFont(value);
+							document.getElementById('unitc'+i).innerHTML=dtaFont(units);
+							document.getElementById('statusc'+i).innerHTML=dtaFont(strstatus);	
+						}
+					}
+					else 
+              			document.getElementById('rowc'+i).style.display="None";
+				}	
+				else 
+              		document.getElementById('rowc'+i).style.display="None";
+          	}
+		}
+	}
+	//alert(Liststation);
+	return true;
+}
+
+</script>
+<body >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<a href="HDSD_GPIs6.6CE.pdf"><img src="download_icon.gif" alt="ecapro"/></a>
+<span id="timer"></span>
+<table width="100%" border="1">
+  <tr>
+    <td id="homemode"><table width="100%" border="1">
+      <tr>
+        <td bgcolor="#0000CC"  ><center>
+          <b><font color="#FFFFFF" face="arial" size="3">ID</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Đầu vào cảm biến</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Điều khiển</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Chế độ</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" face="arial" size="3">ID</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Ngày</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Giờ</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Sự kiện cảnh báo</font></b>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          1
+        </center></td>
+        <td align="center" id='tdinput0'><center>
+          <span id='input0'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out0" value="Điều hòa 1" onclick="Output('1')" /></td>
+        <td align="center" id='modeout0' onclick="ModeOutput('1')"></td>
+        <td align="center"><span id='id0'></span></td>
+        <td align="center"><span id='date0'></span></td>
+        <td align="center"><span id='time0'></span></td>
+        <td align="center"><span id='event0'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          2
+        </center></td>
+        <td align="center" id='tdinput1'><center>
+          <span id='input1'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out1" value="Điều hòa 2" onclick="Output('2')" /></td>
+        <td align="center" id='modeout1' onclick="ModeOutput('2')"></td>
+        <td align="center"><span id='id1'></span></td>
+        <td align="center"><span id='date1'></span></td>
+        <td align="center"><span id='time1'></span></td>
+        <td align="center"><span id='event1'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          3
+        </center></td>
+        <td align="center" id='tdinput2'><center>
+          <span id='input2'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out2" value="Đèn báo động" onclick="Output('3')" /></td>
+        <td align="center" id='modeout2' onclick="ModeOutput('3')"></td>
+        <td align="center"><span id='id2'></span></td>
+        <td align="center"><span id='date2'></span></td>
+        <td align="center"><span id='time2'></span></td>
+        <td align="center"><span id='event2'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          4
+        </center></td>
+        <td align="center" id='tdinput3'><center>
+          <span id='input3'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out3" value="Máy hút ẩm" onclick="Output('4')" /></td>
+        <td align="center" id='modeout3' onclick="ModeOutput('4')"></td>
+        <td align="center"><span id='id3'></span></td>
+        <td align="center"><span id='date3'></span></td>
+        <td align="center"><span id='time3'></span></td>
+        <td align="center"><span id='event3'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          5
+        </center></td>
+        <td align="center" id='tdinput4'><center>
+          <span id='input4'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out4" value="Đèn chiếu sáng" onclick="Output('5')" /></td>
+        <td align="center" id='modeout4' onclick="ModeOutput('5')"></td>
+        <td align="center"><span id='id4'></span></td>
+        <td align="center"><span id='date4'></span></td>
+        <td align="center"><span id='time4'></span></td>
+        <td align="center"><span id='event4'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          6
+        </center></td>
+        <td align="center" id='tdinput5'><center>
+          <span id='input5'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out5" value="Quạt gió" onclick="Output('6')" /></td>
+        <td align="center" id='modeout5' onclick="ModeOutput('6')"></td>
+        <td align="center"><span id='id5'></span></td>
+        <td align="center"><span id='date5'></span></td>
+        <td align="center"><span id='time5'></span></td>
+        <td align="center"><span id='event5'></span></td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td><table cellspacing="0" width="100%" cellpadding="0" border="1">
+      <tr bgcolor="#0000CC">
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Tên thiết bị</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Báo động</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối GSM</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối Server</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối HMI và Modbus</font></b>
+        </center></td>
+      </tr>
+      <tr>
+        <td align="center"><strong><span id='namestation'></span></strong></td>
+        <td align="center"><span id='alarmstation'></span></td>
+        <td align="center"><span id='reportgsm'></span></td>
+        <td align="center"><span id='reportserver'></span></td>
+        <td align="center"><span id='reporthmi'></span></td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+<table width="100%" border="1">
+  <tr bgcolor="#0000CC">
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Time</font></b>
+    </center></th>
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Channel</font></b>
+    </center></th>
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Name</font></b>
+    </center></th>
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Value</font></b>
+    </center></th>
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Unit</font></b>
+    </center></th>
+    <th scope="col"><center>
+      <b><font color="#FFFFFF" face="arial" size="3">Status</font></b>
+    </center></th>
+  </tr>
+  <tr id="rowc0" align="center">
+    <td><span id='timec0'></span></td>
+    <td><span id='channelc0'></span></td>
+    <td><strong><a href="historytrend.htm?channel=0"><span id='namec0'></span></a></strong></td>
+    <td><span id='valuec0'></span></td>
+    <td><span id='unitc0'></span></td>
+    <td><span id='statusc0'></span></td>
+  </tr>
+  <tr id="rowc1" align="center">
+    <td><span id='timec1'></span></td>    
+    <td><span id='channelc1'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=1"><span id='namec1'></span></a></strong></td>
+    <td><span id='valuec1'></span></td>
+    <td><span id='unitc1'></span></td>
+    <td><span id='statusc1'></span></td>
+  </tr>
+ <tr id="rowc2" align="center">
+    <td><span id='timec2'></span></td>    
+    <td><span id='channelc2'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=2"><span id='namec2'></span></a></strong></td>
+    <td><span id='valuec2'></span></td>
+    <td><span id='unitc2'></span></td>
+    <td><span id='statusc2'></span></td>
+  </tr>
+  <tr id="rowc3" align="center">
+    <td><span id='timec3'></span></td>    
+    <td><span id='channelc3'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=3"><span id='namec3'></span></a></strong></td>
+    <td><span id='valuec3'></span></td>
+    <td><span id='unitc3'></span></td>
+    <td><span id='statusc3'></span></td>
+  </tr>
+  <tr id="rowc4" align="center">
+    <td><span id='timec4'></span></td>    
+    <td><span id='channelc4'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=4"><span id='namec4'></span></a></strong></td>
+    <td><span id='valuec4'></span></td>
+    <td><span id='unitc4'></span></td>
+    <td><span id='statusc4'></span></td>
+  </tr> 
+  <tr id="rowc5" align="center">
+    <td><span id='timec5'></span></td>    
+    <td><span id='channelc5'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=5"><span id='namec5'></span></a></strong></td>
+    <td><span id='valuec5'></span></td>
+    <td><span id='unitc5'></span></td>
+    <td><span id='statusc5'></span></td>
+  </tr>
+  <tr id="rowc6" align="center">
+    <td><span id='timec6'></span></td>    
+    <td><span id='channelc6'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=6"><span id='namec6'></span></a></strong></td>
+    <td><span id='valuec6'></span></td>
+    <td><span id='unitc6'></span></td>
+    <td><span id='statusc6'></span></td>
+  </tr>
+  <tr id="rowc7" align="center">
+    <td><span id='timec7'></span></td>    
+    <td><span id='channelc7'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=7"><span id='namec7'></span></a></strong></td>
+    <td><span id='valuec7'></span></td>
+    <td><span id='unitc7'></span></td>
+    <td><span id='statusc7'></span></td>
+  </tr>
+  <tr id="rowc8" align="center">
+    <td><span id='timec8'></span></td>    
+    <td><span id='channelc8'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=8"><span id='namec8'></span></a></strong></td>
+    <td><span id='valuec8'></span></td>
+    <td><span id='unitc8'></span></td>
+    <td><span id='statusc8'></span></td>
+  </tr>
+  <tr id="rowc9" align="center">
+    <td><span id='timec9'></span></td>    
+    <td><span id='channelc9'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=9"><span id='namec9'></span></a></strong></td>
+    <td><span id='valuec9'></span></td>
+    <td><span id='unitc9'></span></td>
+    <td><span id='statusc9'></span></td>
+  </tr>
+  <tr id="rowc10" align="center">
+    <td><span id='timec10'></span></td>    
+    <td><span id='channelc10'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=10"><span id='namec10'></span></a></strong></td>
+    <td><span id='valuec10'></span></td>
+    <td><span id='unitc10'></span></td>
+    <td><span id='statusc10'></span></td>
+  </tr>
+  <tr id="rowc11" align="center">
+    <td><span id='timec11'></span></td>    
+    <td><span id='channelc11'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=11"><span id='namec11'></span></a></strong></td>
+    <td><span id='valuec11'></span></td>
+    <td><span id='unitc11'></span></td>
+    <td><span id='statusc11'></span></td>
+  </tr>
+  <tr id="rowc12" align="center">
+    <td><span id='timec12'></span></td>    
+    <td><span id='channelc12'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=12"><span id='namec12'></span></a></strong></td>
+    <td><span id='valuec12'></span></td>
+    <td><span id='unitc12'></span></td>
+    <td><span id='statusc12'></span></td>
+  </tr>
+  <tr id="rowc13" align="center">
+    <td><span id='timec13'></span></td>    
+    <td><span id='channelc13'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=13"><span id='namec13'></span></a></strong></td>
+    <td><span id='valuec13'></span></td>
+    <td><span id='unitc13'></span></td>
+    <td><span id='statusc13'></span></td>
+  </tr>
+  <tr id="rowc14" align="center">
+    <td><span id='timec14'></span></td>    
+    <td><span id='channelc14'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=14"><span id='namec14'></span></a></strong></td>
+    <td><span id='valuec14'></span></td>
+    <td><span id='unitc14'></span></td>
+    <td><span id='statusc14'></span></td>
+  </tr>
+  <tr id="rowc15" align="center">
+    <td><span id='timec15'></span></td>    
+    <td><span id='channelc15'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=5"><span id='namec15'></span></a></strong></td>
+    <td><span id='valuec15'></span></td>
+    <td><span id='unitc15'></span></td>
+    <td><span id='statusc15'></span></td>
+  </tr>
+  <tr id="rowc16" align="center">
+    <td><span id='timec16'></span></td>    
+    <td><span id='channelc16'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=16"><span id='namec16'></span></a></strong></td>
+    <td><span id='valuec16'></span></td>
+    <td><span id='unitc16'></span></td>
+    <td><span id='statusc16'></span></td>
+  </tr>
+  <tr id="rowc17" align="center">
+    <td><span id='timec17'></span></td>    
+    <td><span id='channelc17'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=17"><span id='namec17'></span></a></strong></td>
+    <td><span id='valuec17'></span></td>
+    <td><span id='unitc17'></span></td>
+    <td><span id='statusc17'></span></td>
+  </tr>
+  <tr id="rowc18" align="center">
+    <td><span id='timec18'></span></td>    
+    <td><span id='channelc18'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=18"><span id='namec18'></span></a></strong></td>
+    <td><span id='valuec18'></span></td>
+    <td><span id='unitc18'></span></td>
+    <td><span id='statusc18'></span></td>
+  </tr>
+  <tr id="rowc19" align="center">
+    <td><span id='timec19'></span></td>    
+    <td><span id='channelc19'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=19"><span id='namec19'></span></a></strong></td>
+    <td><span id='valuec19'></span></td>
+    <td><span id='unitc19'></span></td>
+    <td><span id='statusc19'></span></td>
+  </tr>
+  <tr id="rowc20" align="center">
+    <td><span id='timec20'></span></td>    
+    <td><span id='channelc20'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=20"><span id='namec20'></span></a></strong></td>
+    <td><span id='valuec20'></span></td>
+    <td><span id='unitc20'></span></td>
+    <td><span id='statusc20'></span></td>
+  </tr>
+  <tr id="rowc21" align="center">
+    <td><span id='timec21'></span></td>    
+    <td><span id='channelc21'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=21"><span id='namec21'></span></a></strong></td>
+    <td><span id='valuec21'></span></td>
+    <td><span id='unitc21'></span></td>
+    <td><span id='statusc21'></span></td>
+  </tr>
+  <tr id="rowc22" align="center">
+    <td><span id='timec22'></span></td>    
+    <td><span id='channelc22'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=22"><span id='namec22'></span></a></strong></td>
+    <td><span id='valuec22'></span></td>
+    <td><span id='unitc22'></span></td>
+    <td><span id='statusc22'></span></td>
+  </tr>
+  <tr id="rowc23" align="center">
+    <td><span id='timec23'></span></td>    
+    <td><span id='channelc23'></span></td>
+    <td align="center"><strong><a href="historytrend.htm?channel=23"><span id='namec23'></span></a></strong></td>
+    <td><span id='valuec23'></span></td>
+    <td><span id='unitc23'></span></td>
+    <td><span id='statusc23'></span></td>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0">
+    <div align="left"><a href="http://ecapro.com.vn"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></a></div>
+      </td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC"><a href="graph.htm">ECA-GPIs6.6CE-V0618</a></font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

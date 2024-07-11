@@ -1,0 +1,494 @@
+﻿<html>
+<head>
+<title>Input485 ECA-GPIs6.6CE ECAPRO.VN</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+div.u1{
+	position: absolute;
+	right: 2%;
+	left: 50%;
+
+}
+div.u2{
+	position: absolute;
+	right: 2%;
+	left: 50%;
+	top: 50%;
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 8px;
+}
+tr:nth-child(even) {
+    background-color: #808080;
+}
+body,td,th {
+	color: #FFF;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+	var flagbg=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var flag=0;
+	var mesopen1=[0,0,0,0,0,0,0,0,0,0];
+	var mesopen2=[0,0,0,0,0,0,0,0,0,0];
+	var mesopen3=[0,0,0,0,0,0,0,0,0,0];
+	var mesopen4=[0,0,0,0,0,0,0,0,0,0];
+	var mesclose1=[0,0,0,0,0,0,0,0,0,0];
+	var mesclose2=[0,0,0,0,0,0,0,0,0,0];
+	var mesclose3=[0,0,0,0,0,0,0,0,0,0];
+	var mesclose4=[0,0,0,0,0,0,0,0,0,0];
+	// Following function will process data received from 
+	// Dieu khien loi ra 1
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_input485setting",[], receiverdatas);
+		Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				var enablealarm =		(rcd.length > 5)? rcd[5] : "";		
+				for(var i=0;i<10;i++)
+				{
+					ind=i+1;
+					mesopen1[i]= (rcd.length > i*2+6)? rcd[i*2+6] : "";
+					mesclose1[i]= 	(rcd.length > i*2+7)? rcd[i*2+7] : "";	
+					mesopen2[i]= (rcd.length > i*2+26)? rcd[i*2+26] : "";
+					mesclose2[i] = 	(rcd.length > i*2+27)? rcd[i*2+27] : "";	
+					mesopen3[i]= (rcd.length > i*2+46)? rcd[i*2+46] : "";
+					mesclose3[i] = 	(rcd.length > i*2+47)? rcd[i*2+47] : "";	
+					mesopen4[i]= (rcd.length > i*2+66)? rcd[i*2+66] : "";
+					mesclose4[i] = 	(rcd.length > i*2+67)? rcd[i*2+67] : "";
+					
+				}
+				
+			}
+		}
+    }
+	// convenience: wrap value in specified font
+    function setFont(val, face, size) {
+        var s = "<font";
+        s += " face='" + face + "'";
+        s += "size=" + size;
+        s += ">";
+        s += val;
+        s += "</font>";
+        return s;
+    }
+    
+    // convenience: set header font
+    function hdrFont(val) {
+       return "<center>" + setFont(val, "arial", 3) + "</center>";
+    }
+
+  	function callMacro_UpdateMonitor()
+    {
+      // Get data from macro
+       if(flag==0)
+	   {	flag=1;
+	   		webiopi().callMacro("input485_monitoring", [], ReceiverUpdateMonitor);
+	   }
+	   else if(flag==1)
+	   {	flag=0;
+			webiopi().callMacro("UpdateStatus",[], receiverUpdateStatus);
+	   } 
+	  
+	}
+	function ReceiverUpdateMonitor(macro, args, response)
+	{
+		var rcd = response.split('\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			document.getElementById('Intinput1').innerHTML=(rcd.length > 0)? rcd[0] : "";
+			var statusmodule1=(rcd.length > 4)? rcd[4] : "";
+			if(statusmodule1=='0')
+				document.getElementById('Intinput1').style.color="balck";
+			else
+				document.getElementById('Intinput1').style.color="white";
+			var inputs1=document.getElementById('Intinput1').innerHTML;
+			var inputs1bin=Number(inputs1).toString(2);
+			var inputs1binstr=inputs1bin.split('');
+			for(j=0;j<10;j++)
+			{	
+				ind=j+1;
+				var bits1=(inputs1binstr.length > (inputs1binstr.length-j-1))? inputs1binstr[inputs1binstr.length-j-1]: "";
+				if(bits1=='1')
+				{
+					document.getElementById('tdinput1'+ind).style.color="#f2f2f2";		
+					document.getElementById('tdinput1'+ind).bgColor="#003399";
+					document.getElementById('input1'+ind).innerHTML=hdrFont(mesclose1[j]);
+				}
+				else
+				{
+					document.getElementById('tdinput1'+ind).style.color="#003399";	
+					document.getElementById('tdinput1'+ind).bgColor="#f2f2f2";	
+					document.getElementById('input1'+ind).innerHTML=hdrFont(mesopen1[j]);
+				}
+			}
+			
+			document.getElementById('Intinput2').innerHTML=(rcd.length > 1)? rcd[1] : "";
+			var statusmodule2=(rcd.length > 5)? rcd[5] : "";
+			if(statusmodule2=='0')
+				document.getElementById('Intinput2').style.color="balck";
+			else
+				document.getElementById('Intinput2').style.color="white";
+			
+			var inputs2=document.getElementById('Intinput2').innerHTML;
+			var inputs2bin=Number(inputs2).toString(2);
+			var inputs2binstr=inputs2bin.split('');
+			for(j=0;j<10;j++)
+			{	
+				ind=j+1;
+				var bits2=(inputs2binstr.length > (inputs2binstr.length-j-1))? inputs2binstr[inputs2binstr.length-j-1]: "";
+				if(bits2=='1')
+				{						
+					document.getElementById('tdinput2'+ind).style.color="#f2f2f2";	
+					document.getElementById('tdinput2'+ind).bgColor="#003399";
+					document.getElementById('input2'+ind).innerHTML=hdrFont(mesclose2[j]);
+				}
+				else
+				{
+
+					document.getElementById('tdinput2'+ind).style.color="#003399";
+					document.getElementById('tdinput2'+ind).bgColor="#f2f2f2";	
+					document.getElementById('input2'+ind).innerHTML=hdrFont(mesopen2[j]);
+				}
+			}
+			
+			
+			document.getElementById('Intinput3').innerHTML=(rcd.length > 2)? rcd[2] : "";
+			var statusmodule3=(rcd.length > 6)? rcd[6] : "";
+			if(statusmodule3=='0')
+				document.getElementById('Intinput3').style.color="balck";
+			else
+				document.getElementById('Intinput3').style.color="white";
+			var inputs3=document.getElementById('Intinput3').innerHTML;
+			var inputs3bin=Number(inputs3).toString(2);
+			var inputs3binstr=inputs3bin.split('');
+			for(j=0;j<10;j++)
+			{	
+				ind=j+1;
+				var bits3=(inputs3binstr.length > (inputs3binstr.length-j-1))? inputs3binstr[inputs3binstr.length-j-1]: "";
+				if(bits3=='1')
+				{
+					document.getElementById('tdinput3'+ind).style.color="#f2f2f2";		
+					document.getElementById('tdinput3'+ind).bgColor="#003399";
+					document.getElementById('input3'+ind).innerHTML=hdrFont(mesclose3[j]);
+				}
+				else 
+				{
+					document.getElementById('tdinput3'+ind).style.color="#003399";
+					document.getElementById('tdinput3'+ind).bgColor="#f2f2f2";	
+					document.getElementById('input3'+ind).innerHTML=hdrFont(mesopen3[j]);
+				}
+			}
+			
+			document.getElementById('Intinput4').innerHTML=(rcd.length > 3)? rcd[3] : "";
+			var statusmodule4=(rcd.length > 7)? rcd[7] : "";
+			if(statusmodule4=='0')
+				document.getElementById('Intinput4').style.color="balck";
+			else
+				document.getElementById('Intinput4').style.color="white";
+				
+			var inputs4=document.getElementById('Intinput4').innerHTML;
+			var inputs4bin=Number(inputs4).toString(2);
+			var inputs4binstr=inputs4bin.split('');
+			for(j=0;j<10;j++)
+			{	
+				ind=j+1;
+				var bits4=(inputs4binstr.length > (inputs4binstr.length-j-1))? inputs4binstr[inputs4binstr.length-j-1]: "";
+				if(bits4=='1')
+				{
+					document.getElementById('tdinput4'+ind).style.color="#f2f2f2";		
+					document.getElementById('tdinput4'+ind).bgColor="#003399";
+					document.getElementById('input4'+ind).innerHTML=hdrFont(mesclose4[j]);
+				}
+				else 
+				{
+					document.getElementById('tdinput4'+ind).style.color="#003399";
+					document.getElementById('tdinput4'+ind).bgColor="#f2f2f2";	
+					document.getElementById('input4'+ind).innerHTML=hdrFont(mesopen4[j]);
+				}
+			}
+			document.getElementById('timer').innerHTML=(rcd.length > 8)? rcd[8] : "";
+		}
+	}
+	//------------------------------------------------------------
+	function receiverUpdateStatus(macro, args, response) 
+	{
+		var rcd = response.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	
+						
+						document.getElementById('namestation').innerHTML=(fld.length > 0)? fld[0] : "";
+						alarmstatus=(fld.length > 1)? fld[1] : "";
+						if(alarmstatus=="ARMED")
+							document.getElementById('alarmstation').innerHTML="Đang BẬT";
+						else if(alarmstatus=="DISARMED")
+							document.getElementById('alarmstation').innerHTML="Đang TẮT";
+						document.getElementById('reportgsm').innerHTML=(fld.length > 2)? fld[2] : "";
+						document.getElementById('reportserver').innerHTML=(fld.length > 3)? fld[3] : "";
+						document.getElementById('reporthmi').innerHTML=(fld.length > 4)? fld[4] : "";
+
+						
+					}
+				}
+			}
+		}
+	}
+	//------------------------------------------------------------
+
+</script>
+<body bgcolor="#696969" onLoad="callMacro_Listevents();">
+<font color="#FFFFFF">Date time: <span id="timer"></span></font>
+<table width="100%" border="1">
+  <tr>
+    <td id="homemode"><table width="100%" border="1">
+      <tr>
+        <td bgcolor="#0000CC"  ><center>
+          <b><font color="#FFFFFF" face="arial" size="3">In</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Đầu vào số Module 1 </font></b>
+          <span id='Intinput1'></span>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Đầu vào số Module 2 </font></b>
+          <span id='Intinput2'></span>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Đầu vào số Module 3 </font></b>
+          <span id='Intinput3'></span>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="3" face="arial">Đầu vào số Module 4 </font></b>
+          <span id='Intinput4'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          1
+        </center></td>
+        <td align="center" id='tdinput11'><center><span id='input11'></span></center></td>
+        <td align="center" id='tdinput21'><center>
+          <span id='input21'></span>
+        </center></td>
+        <td align="center" id='tdinput31'><center>
+          <span id='input31'></span>
+        </center></td>
+        <td align="center" id='tdinput41'><center>
+          <span id='input41'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          2
+        </center></td>
+        <td align="center" id='tdinput12'><center>
+          <span id='input12'></span>
+        </center></td>
+        <td align="center" id='tdinput22'><center>
+          <span id='input22'></span>
+        </center></td>
+        <td align="center" id='tdinput32'><center>
+          <span id='input32'></span>
+        </center></td>
+        <td align="center" id='tdinput42'><center>
+          <span id='input42'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          3
+        </center></td>
+        <td align="center" id='tdinput13'><center>
+          <span id='input13'></span>
+        </center></td>
+        <td align="center" id='tdinput23'><center>
+          <span id='input23'></span>
+        </center></td>
+        <td align="center" id='tdinput33'><center>
+          <span id='input33'></span>
+        </center></td>
+        <td align="center" id='tdinput43'><center>
+          <span id='input43'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          4
+        </center></td>
+        <td align="center" id='tdinput14'><center>
+          <span id='input14'></span>
+        </center></td>
+        <td align="center" id='tdinput24'><center>
+          <span id='input24'></span>
+        </center></td>
+        <td align="center" id='tdinput34'><center>
+          <span id='input34'></span>
+        </center></td>
+        <td align="center" id='tdinput44'><center>
+          <span id='input44'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          5
+        </center></td>
+        <td align="center" id='tdinput15'><center>
+          <span id='input15'></span>
+        </center></td>
+        <td align="center" id='tdinput25'><center>
+          <span id='input25'></span>
+        </center></td>
+        <td align="center" id='tdinput35'><center>
+          <span id='input35'></span>
+        </center></td>
+        <td align="center" id='tdinput45'><center>
+          <span id='input45'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center">6</td>
+        <td align="center" id='tdinput16'><center>
+          <span id='input16'></span>
+        </center></td>
+        <td align="center" id='tdinput26'><center>
+          <span id='input26'></span>
+        </center></td>
+        <td align="center" id='tdinput36'><center>
+          <span id='input36'></span>
+        </center></td>
+        <td align="center" id='tdinput46'><center>
+          <span id='input46'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center">7</td>
+        <td align="center" id='tdinput17'><center>
+          <span id='input17'></span>
+        </center></td>
+        <td align="center" id='tdinput27'><center>
+          <span id='input27'></span>
+        </center></td>
+        <td align="center" id='tdinput37'><center>
+          <span id='input37'></span>
+        </center></td>
+        <td align="center" id='tdinput47'><center>
+          <span id='input47'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center">8</td>
+        <td align="center" id='tdinput18'><center>
+          <span id='input18'></span>
+        </center></td>
+        <td align="center" id='tdinput28'><center>
+          <span id='input28'></span>
+        </center></td>
+        <td align="center" id='tdinput38'><center>
+          <span id='input38'></span>
+        </center></td>
+        <td align="center" id='tdinput48'><center>
+          <span id='input48'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center">9</td>
+        <td align="center" id='tdinput19'><center>
+          <span id='input19'></span>
+        </center></td>
+        <td align="center" id='tdinput29'><center>
+          <span id='input29'></span>
+        </center></td>
+        <td align="center" id='tdinput39'><center>
+          <span id='input39'></span>
+        </center></td>
+        <td align="center" id='tdinput49'><center>
+          <span id='input49'></span>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          10
+        </center></td>
+        <td align="center" id='tdinput110'><center>
+          <span id='input110'></span>
+        </center></td>
+        <td align="center" id='tdinput210'><center>
+          <span id='input210'></span>
+        </center></td>
+        <td align="center" id='tdinput310'><center>
+          <span id='input310'></span>
+        </center></td>
+        <td align="center" id='tdinput410'><center>
+          <span id='input410'></span>
+        </center></td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td><table cellspacing="0" width="100%" cellpadding="0" border="1">
+      <tr bgcolor="#0000CC">
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Tên thiết bị</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Báo động</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối GSM</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối Ethernet</font></b>
+        </center></td>
+        <td><center>
+          <b><font color="#FFFFFF" face="arial" size="3">Kết nối HMI và Modbus</font></b>
+        </center></td>
+      </tr>
+      <tr>
+        <td align="center"><strong><span id='namestation'></span></strong></td>
+        <td align="center"><span id='alarmstation'></span></td>
+        <td align="center"><span id='reportgsm'></span></td>
+        <td align="center"><span id='reportserver'></span></td>
+        <td align="center"><span id='reporthmi'></span></td>
+      </tr>
+    </table></td>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0">
+    <div align="left"><a href="index.htm"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></a></div>
+      </td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC"><a href="index.htm">ECA-GPIs6.6CE-V1118</a></font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

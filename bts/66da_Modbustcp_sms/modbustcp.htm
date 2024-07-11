@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Modbus TCP ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_modbustcp",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('ipaddress').value =		(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('port').value =		(rcd.length > 1)? rcd[1] : "";	
+				document.getElementById('stationid').value = 		(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('timeout').value = 		(rcd.length > 3)? rcd[3] : "";
+				for(var i=0;i<4;i++)
+				{
+					document.getElementById('address'+i).value=	(rcd.length > i*6+4)? rcd[i*6+4] : "";
+					document.getElementById('fc'+i).value = 		(rcd.length > i*6+5)? rcd[i*6+5] : "";
+					document.getElementById('number'+i).value = 	(rcd.length > i*6+6)? rcd[i*6+6] : "";
+					document.getElementById('datatype'+i).value =  (rcd.length > i*6+7)? rcd[i*6+7] : "";
+					document.getElementById('read'+i).innerHTML =  (rcd.length > i*6+8)? rcd[i*6+8] : "";
+					document.getElementById('select'+i).value =  (rcd.length > i*6+9)? rcd[i*6+9] : "";
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('ipaddress').value+';';
+		stringval=stringval+document.getElementById('port').value+';';
+		stringval=stringval+document.getElementById('stationid').value+';';
+		stringval=stringval+document.getElementById('timeout').value+';';
+		for(var i=0;i<4;i++)
+		{
+			stringval=stringval+document.getElementById('address'+i).value+';';
+			stringval=stringval+document.getElementById('fc'+i).value+';';
+			stringval=stringval+document.getElementById('number'+i).value+';';
+			stringval=stringval+document.getElementById('datatype'+i).value+';';
+			stringval=stringval+' ;';
+			stringval=stringval+document.getElementById('select'+i).value+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_modbustcp",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="calibrationsetting.htm">Calibration Setting</a>
+    <a href="functionssetting.htm">Function Setting</a>
+    <a class="active" href="modbustcp.htm">Modbus TCP Setting</a>
+    <a href="iosetting.htm">IO Setting</a>
+    <a href="networksetting.html">Network Setting</a>
+</div>
+    <table width="100%" border="1">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>IP Address</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Port</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Station/Slave ID</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Time Out (0.1-10 sec)</strong></td>
+  </tr>
+  <tr align="center">
+    <td><input name="ipaddress" type="text" id="ipaddress"  /></td>
+    <td><input name="port" type="number" id="port" size="10" /></td>
+    <td><input name="stationid" type="number" id="stationid"  size="10"/></td>
+    <td><input name="timeout" type="number" id="timeout" size="10" /></td>
+  </tr>
+    </table>
+
+    <p>
+    <label><strong>Modbus TCP Setting :</strong></label>
+  </p>
+<table width="100%" border="0" align="center">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Address Register </strong></td>
+    <td bgcolor="#CCCCCC"><strong>Function code </strong></td>
+    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Data type</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Recever Data</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Select Channel 1 ~ 24</strong></td>
+    </tr>
+  <tr align="center" id="channel0">
+    <td><input name="as0" id="address0" type="number"  maxlength="6" size="6" /></td>
+    <td><select name="fc0" id="fc0">
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+    </select></td>
+    <td><input type="number" id='number0' maxlength="5" size="4"/></td>
+    <td><select name="datatype0" id="datatype0">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><span id="read0"></span></td>
+    <td><input name="select0" id="select0" type="number"  maxlength="2" size="2" /></td>
+    </tr>
+  <tr align="center" id="channel1">
+    <td><input name="address1" id="address1" type="number"  maxlength="6" size="6" /></td>
+    <td><select name="fc1" id="fc1">
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      
+    </select></td>
+    <td><input type="number" id='number1' maxlength="5" size="4" /></td>
+    <td><select name="datatype1" id="datatype1">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><span id="read1"></span></td>
+    <td><input name="select1" id="select1" type="number"  maxlength="2" size="2" /></td>
+    </tr>
+  <tr align="center" id="channel2">
+    <td><input name="address" id="address2" type="number"  maxlength="6" size="6"/></td>
+    <td><select name="fc" id="fc2">
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+    </select></td>
+    <td><input type="number" id='number2' maxlength="5" size="4"/></td>
+    <td><select name="datatype" id="datatype2">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><span id="read2"></span></td>
+    <td><input name="select2" id="select2" type="number"  maxlength="2" size="2" /></td>
+    </tr>
+  <tr align="center" id="channel3">
+    <td><input name="address" id="address3" type="number"  maxlength="6" size="6" /></td>
+    <td><select name="fc" id="fc3">
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+    </select></td>
+    <td><input type="number" id='number3' maxlength="5" size="4" /></td>
+    <td><select name="datatype2" id="datatype3">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+    </select></td>
+    <td><span id="read3"></span></td>
+    <td><input name="select3" id="select3" type="number"  maxlength="2" size="2" /></td>
+    </tr>
+   
+    </table>
+<p><span id="result"></span>  </p>
+<p>
+	  <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+	</p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2017 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V1217</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

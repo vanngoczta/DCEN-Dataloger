@@ -1,0 +1,54 @@
+1
+0
+0
+20
+20
+90
+40
+20
+1
+1
+30.0
+10.0
+90
+2
+Open IN1
+Close IN1
+1
+0
+2
+Open IN2
+Close IN2
+1
+0
+2
+Open IN3
+Close IN3
+1
+0
+2
+Open IN4
+Close IN4
+1
+0
+2
+Open IN5
+Close IN5
+1
+0
+2
+Open IN6
+Close IN6
+1
+0
+2
+Open IN7
+Close IN7
+1
+0
+2
+Open IN8
+Close IN8
+1
+0
+Sat Jul 28 2018 16:04:08 GMT+0700 (Indochina Time)

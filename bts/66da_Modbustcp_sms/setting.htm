@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>ECA-GPIs6.6CE-MODBUS</title>
+
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_setting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('nameid1').value =		(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('nameid2').value= 		(rcd.length > 1)? rcd[1] : "";
+				document.getElementById('nameid3').value = 		(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('nameid4').value = 		(rcd.length > 3)? rcd[3] : "";
+				document.getElementById('nameid5').value = 		(rcd.length > 4)? rcd[4] : "";
+				document.getElementById('nameid6').value = 		(rcd.length > 5)? rcd[5] : "";
+				document.getElementById('nameid7').value = 		(rcd.length > 6)? rcd[6] : "";
+				document.getElementById('nameid8').value = 		(rcd.length > 7)? rcd[7] : "";
+				document.getElementById('nameid9').value = 		(rcd.length > 8)? rcd[8] : "";
+				document.getElementById('nameid10').value = 	(rcd.length > 9)? rcd[9] : "";
+				
+				document.getElementById('mesthlo').value = 		(rcd.length > 10)? rcd[10] : "";
+				document.getElementById('mesthhi').value = 		(rcd.length > 11)? rcd[11] : "";
+				document.getElementById('mesinop').value = 		(rcd.length > 12)? rcd[12] : "";
+				document.getElementById('mesincl').value = 		(rcd.length > 13)? rcd[13] : "";
+				
+				document.getElementById('teml').value = 		(rcd.length > 14)? rcd[14] : "";
+				document.getElementById('temh').value = 		(rcd.length > 15)? rcd[15] : "";
+				document.getElementById('temo').value = 		(rcd.length > 16)? rcd[16] : "";
+				document.getElementById('huml').value = 		(rcd.length > 17)? rcd[17] : "";
+				document.getElementById('humh').value = 		(rcd.length > 18)? rcd[18] : "";
+				
+				document.getElementById('tout').value = 		(rcd.length > 19)? rcd[19] : "";
+				document.getElementById('tloo').value = 		(rcd.length > 20)? rcd[20] : "";
+				document.getElementById('seo4').value = 		(rcd.length > 21)? rcd[21] : "";
+				document.getElementById('tdel').value = 		(rcd.length > 22)? rcd[22] : "";
+				document.getElementById('tinf').value = 		(rcd.length > 23)? rcd[23] : "";
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		// Arguments sent to the macro, id channel
+        var values = [$("#nameid1").val(),$("#nameid2").val(),$("#nameid3").val(),$("#nameid4").val()
+		,$("#nameid5").val(),$("#nameid6").val(),$("#nameid7").val(),$("#nameid8").val(),$("#nameid9").val(),$("#nameid10").val()
+		,$("#mesthlo").val(),$("#mesthhi").val(),$("#mesinop").val(),$("#mesincl").val()
+		,$("#teml").val(),$("#temh").val(),$("#temo").val(),$("#huml").val(),$("#humh").val()
+		,$("#tout").val(),$("#tloo").val(),$("#seo4").val(),$("#tdel").val(),$("#tinf").val()];
+        // Call the macro
+        webiopi().callMacro("save_setting",values, receiverdatas);
+		document.getElementById('result').innerHTML="Saving..";
+		Flag=1;
+	}
+</script>
+</head>
+<body bgcolor="white" onload="callMacro_Listevents()" >
+<table border="0" width="100%"  bgcolor="#C0C0C0">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.html"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+  </tr>
+</table>
+</div>
+		<p>
+		  <label><strong>Temperature and Humidity: </strong></label>
+</p>
+ <table width="80%" border="2" align="center">
+          <tr bgcolor="#CCCCCC">
+            <td width="50%" bgcolor="#CCCCCC">&nbsp;</td>
+            <td bgcolor="#CCCCCC"><strong>Sensor name</strong> </td>
+    </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Temperature 1</td>
+            <td><input name="met0" type="text" id="nameid1" size="16"  maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Temperature 2</td>
+            <td><input name="met2" type="text" id="nameid2" size="16" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Humidity 1</td>
+            <td><input name="met4" type="text"  id="nameid3" size="16" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Humidity 2</td>
+            <td><input name="met6" type="text"  id="nameid4" size="16" maxlength="16" /></td>
+          </tr>
+</table>
+<table width="80%" border="1" align="center">
+    <tr>
+      <td width="50%" bgcolor="#CCCCCC"><strong>Message Low Setpoint</strong></td>
+      <td bgcolor="#CCCCCC"><strong>Message High Setpoint</strong></td>
+    </tr>
+    <tr>
+      <td><input name="mesl" type="text"  id="mesthlo" maxlength="15" /></td>
+      <td><input name="mesh" type="text"  id="mesthhi" maxlength="15" /></td>
+    </tr>
+  </table>
+<table width="80%" border="2" align="center">
+           <tr>
+             <td width="50%" bordercolor="#ECE9D8" bgcolor="#CCCCCC"><span class="style4">Setpoint low temperature</span></td>
+             <td width="50%">
+               <div align="left">
+                 <input name="teml" type="number" min="1" max="80" id="teml"  maxlength="2" />           
+             </div></td>
+    </tr>
+           <tr>
+             <td bordercolor="#ECE9D8" bgcolor="#CCCCCC"><span class="style4">
+               <label>Setpoint high temperature</label>
+             </span></td>
+             <td><div align="left">
+               <input name="temh" type="number" min="1" max="80" id="temh"  maxlength="2" />
+             </div></td>
+    </tr>
+           <tr>
+             <td bordercolor="#ECE9D8" bgcolor="#CCCCCC">               <span class="style4">
+               <label>Temperature offset control output 1, 2</label>
+             </span>              </td>
+             <td>
+               <div align="left">
+                 <input name="temo" type="number" min="1" max="80" id="temo"  maxlength="2" />
+             </div></td>
+           </tr>
+           <tr>
+             <td bordercolor="#ECE9D8" bgcolor="#CCCCCC"><span class="style4">Setpoint low humidity </span></td>
+             <td>
+                   <div align="left">
+                         <label>
+                         <input name="huml" type="number" min="1" max="100" id="huml"  maxlength="3" />
+                         </label>
+                   </div></td>
+           </tr>
+           <tr>
+             <td bordercolor="#ECE9D8" bgcolor="#CCCCCC"><span class="style4">
+               <label>Setpoint high humidity </label>
+             </span></td>
+             <td>
+               <div align="left">
+                 <input name="humh" type="number" min="1" max="100" id="humh" maxlength="3" />
+             </div></td>
+           </tr>
+  </table>
+  <div>
+          <p>
+            <label><strong>Input and Output: </strong></label>
+    </p>
+  </div>
+<table width="80%" border="2" align="center">
+          <tr bgcolor="#993300">
+            <td width="50%" bgcolor="#CCCCCC">&nbsp;</td>
+            <td bgcolor="#CCCCCC"><strong>Input name</strong></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 1</td>
+            <td><input name="mci0" type="text"  id="nameid5" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 2</td>
+            <td><input name="mci1" type="text"  id="nameid6" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 3</td>
+            <td><input name="mci2" type="text" id="nameid7" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 4</td>
+            <td><input name="mci3" type="text" id="nameid8" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 5</td>
+            <td><input name="mci4" type="text" id="nameid9" maxlength="16" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">IN 6</td>
+            <td><input name="mci5" type="text" id="nameid10" maxlength="16" /></td>
+          </tr>
+  </table>
+<table width="80%" border="1" align="center">
+      <tr>
+        <td  width="50%" bgcolor="#CCCCCC"><strong>Message Open</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Message Close</strong></td>
+      </tr>
+      <tr>
+        <td><input name="mesopen" type="text"  id="mesinop" maxlength="15" /></td>
+        <td><input name="mesclose" type="text"  id="mesincl" maxlength="15" /></td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+    <table width="80%" border="2" align="center">
+          <tr>
+            <td width="50%" bgcolor="#CCCCCC"><span class="style4">Toutput (Output 3 Siren) </span></td>
+            <td width="50%"><label>
+              <input name="tout" type="number" id="tout" size="6" maxlength="2" />
+            </label></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC"><span class="style4">Time sequence Control Output 1, 2 </span></td>
+            <td><input name="tloo" type="number" id="tloo" size="6" maxlength="2" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC"><span class="style4">Control Output 4 </span></td>
+            <td><label for="select"></label>
+              <select name="seo4" id="seo4">
+                <option value="0" >On greater than high Temperature</option>
+                <option value="1" >On greater than high Humidity</option>
+                <option value="2" >On less than low Humidity</option>
+                <option value="3" >Sequence control</option>
+              </select></td>
+          </tr>
+</table>
+        <div>
+          <p>
+            <label><strong>Events and Alarms: </strong></label>
+          </p>
+</div>
+    <table width="80%" border="2" align="center">
+          <tr>
+            <td width="50%" bgcolor="#CCCCCC"><span class="style4">Tdelay (The delay time to carry out the alarm) </span></td>
+            <td width="191"><label>
+              <input name="tdel" type="number" min="1" max="99" id="tdel"  maxlength="2" />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC"><span class="style4">Tinfor (The timer auto send SMS Infor)</span></td>
+            <td><input name="tinf" type="number" min="0" max="24" id="tinf" maxlength="2" /></td>
+          </tr>
+</table>
+<span id="result"></span> 
+    <p>
+      <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+</p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+<tr>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2014 DCEN.VN</font></strong></font></div></a></td>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">ECA-GPIs14CE-V514</font></strong></font></div></td>
+</tr>
+</table>
+</body>
+</html>

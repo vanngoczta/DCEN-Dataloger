@@ -1,0 +1,441 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>DCEN.VN</title>
+<link rel="stylesheet" href="font.css">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link href="jquery-mobile/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css"/>
+<script src="jquery-mobile/jquery-1.6.4.min.js" type="text/javascript"></script>
+<script src="jquery-mobile/jquery.mobile-1.0.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+	var indexstatus=0;
+	var flag=0;
+	var flagbg=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	webiopi().ready(function() 
+	{	
+	});
+	// convenience: set data font
+    function dtaFont(val) {
+       return "<font size='3' face=\"arial\" >" + val + "</font>";
+    }
+	function Output(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("Outputgraph", index, ReceiverUpdateInOut);
+    }
+	function ModeOutput(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("ModeOutput", index, ReceiverUpdateInOut);
+    }
+	function ReceiverUpdateMonitor(macro, args, text) 
+	{
+        if (text != null) 
+		{
+			var rcd = text.split('\r\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{
+				var flagindex = 0;
+				var tableData = "";
+				// Time | channel | namechannel | value | unit | status | Input | Output
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					if (rcd[i].trim() != "") 
+					{	
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+							var name 		 = 	(fld.length > 0)? fld[0] : "";
+							var value  		= 	(fld.length > 1)? fld[1] : "";
+							var units  		= 	(fld.length > 2)? fld[2] : "";
+							var status  		= 	(fld.length > 3)? fld[3] : "";
+							var lowset  		= 	(fld.length > 4)? fld[4] : "";
+							var highset  		= 	(fld.length > 5)? fld[5] : "";
+							if(document.getElementById('th'+i))
+							{
+								document.getElementById('th'+i).innerHTML=value+" "+dtaFont(units);
+								if(Number(value)>Number(highset))
+								{
+									if(flagbg[i]==0)
+									{	
+										document.getElementById('th'+i).style.backgroundColor="red";
+										flagbg[i]=1;
+									}
+									else
+									{	
+										document.getElementById('th'+i).style.backgroundColor="black";
+										flagbg[i]=0;
+									}
+								}
+								else if(Number(value)<Number(lowset))
+								{
+									if(flagbg[i]==0)
+									{	
+										document.getElementById('th'+i).style.backgroundColor="yellow";
+										flagbg[i]=1;
+									}
+									else
+									{	
+										document.getElementById('th'+i).style.backgroundColor="black";
+										flagbg[i]=0;
+									}
+								}
+								else if(Number(value)>Number(lowset) && Number(value)<Number(highset))
+									document.getElementById('th'+i).style.backgroundColor="blue";
+								else if(Number(value)==Number(lowset) || Number(value)==Number(highset))
+								{
+									if(flagbg[i]==0)
+									{	
+										document.getElementById('th'+i).style.backgroundColor="yellow";
+										flagbg[i]=1;
+									}
+									else
+									{	
+										document.getElementById('th'+i).style.backgroundColor="green";
+										flagbg[i]=0;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+    }
+	// Following function will process data received from 
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+  	function callMacro_UpdateMonitor()
+    {
+		if(flag==0)
+		{
+			flag=1;
+       		// Get data from macro
+	   		webiopi().callMacro("UpdateMonitorAll", [], ReceiverUpdateMonitor );	
+		}
+		else if(flag==1)
+		{	flag=2;
+			webiopi().callMacro("UpdateInOut",[], ReceiverUpdateInOut);
+		}
+		else if(flag==2)
+	   	{	
+			flag=0;
+	   		webiopi().callMacro("UpdateStatus",[], receiverUpdateStatus);
+	   	}
+		var d = new Date();
+		var n = d.toLocaleString();
+		//document.getElementById('timer').innerHTML=n;
+	}
+
+	//------------------------------------------------------------
+	// Following function will process data received from set/getLightHours macro.
+	function ReceiverUpdateInOut(macro, args, response) 
+	{
+        if (response != null) 
+		{
+			var rcd = response.split('\r\n');
+			if (rcd.length >= 1) 
+			{
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					if (rcd[i].trim() != "") 
+					{	
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+
+							var input=(fld.length > 0)? fld[0] : "";
+							var output=(fld.length > 1)? fld[1] : "";
+							var modoutput=(fld.length > 2)? fld[2] : "";
+							var modoutputb=Number(modoutput).toString(2);
+							var modoutputstr=modoutputb.split('');
+							var bits=(modoutputstr.length > 0)?modoutputstr[0]: "";
+							/*if(bits=='1')
+								document.getElementById('modeoutput0').src="auto_off.jpg";
+							else
+								document.getElementById('modeoutput0').src="auto_on.jpg";*/
+							var outputb=Number(output).toString(2);
+							var outputstr=outputb.split('');
+							for(i=0;i<5;i++)
+							{   
+								var bits=(outputstr.length > (outputstr.length-i-1))? outputstr[outputstr.length-i-1]: "";
+								if(bits=='1' && document.getElementById('out' + i))
+								{	
+									if(i==0)
+										document.getElementById('out' + i).src="fan_on.gif";									
+									else if(i==1)
+										document.getElementById('out' + i).src="fan_on.gif";
+									else if(i==2)
+									{	
+										if(flagbg[29])
+										{
+											flagbg[29]=0;
+											document.getElementById('out' + i).src="siren_on.gif";
+										}
+										else
+										{
+											flagbg[29]=1;
+											document.getElementById('out' + i).src="siren_off.gif";
+										}
+									}
+									else if(i==3)
+										document.getElementById('out' + i).src="fan_on.gif";
+									else if(i==4)
+									{	
+										document.getElementById('out' + i).src="Lamp_on.jpg";
+										i=i+1;
+										document.getElementById('out' + i).src="Lamp_on.jpg";
+									}
+										
+								}
+								else if(document.getElementById('out' + i))
+								{	
+									if(i==0)
+										document.getElementById('out' + i).src="fan_off.gif";									
+									else if(i==1)
+										document.getElementById('out' + i).src="fan_off.gif";
+									else if(i==2)
+										document.getElementById('out' + i).src="siren_off.gif";
+									else if(i==3)
+										document.getElementById('out' + i).src="fan_off.gif";
+									else if(i==4)
+									{	
+										document.getElementById('out' + i).src="Lamp_off.jpg";
+										i=i+1;
+										document.getElementById('out' + i).src="Lamp_off.jpg";
+									}
+								}
+							}	
+						}
+					}
+				}
+			}
+		}
+    }
+//Trang thai thiet bi	
+	function receiverUpdateStatus(macro, args, response) 
+	{
+		var d = new Date();
+		var n = d.toLocaleString();
+		var rcd = response.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	
+						if(indexstatus==0)
+						{	
+							document.getElementById('timer').innerHTML=(fld.length > 4)? fld[4] : "";
+							indexstatus=1;
+						}
+						else if(indexstatus==1)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 2)? fld[2] : "";
+							indexstatus=2;
+						}
+						else if(indexstatus==2)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 3)? fld[3] : "";
+							indexstatus=3;
+						}
+						else if(indexstatus==3)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 4)? fld[4] : "";
+							indexstatus=4;
+						}
+						else if(indexstatus==4)
+						{
+							var today=new Date();
+							var h=today.getHours();
+							var m=today.getMinutes();
+							var s=today.getSeconds();
+							document.getElementById('timer').innerHTML=h+":"+m+":"+s;
+							indexstatus=0;
+						}
+					}
+				}
+			}
+		}
+	}
+	//------------------------------------------------------------
+</script>
+<style type="text/css">
+.ui-page {
+    background: transparent url(Khominhan.jpg);
+	background-size:100% 100%;
+
+}
+.home
+{
+	position: absolute;
+	top: 0%;
+	right: 94%;
+}
+.setting
+{
+	position: absolute;
+	top: 0%;
+	right: 82%;
+}
+.settingnet
+{
+	position: absolute;
+	top: 0%;
+	right: 78%;
+}
+.logo
+{
+	position: absolute;
+	top: 1%;
+	right: 1%;
+}
+.auto{
+	position: absolute;
+	top: 75%;
+	right: 6%;
+}
+.air1{
+	position: absolute;
+	top: 38%;
+	right: 4%;
+}
+.air2{
+	position: absolute;
+	top: 60%;
+	right: 4%;
+}
+.siren{
+	position: absolute;
+	top: 12%;
+	right: 6%;
+}
+.fan{position: absolute;top: 49%;	right: 91%;}
+.lamp1{position: absolute;top: 49%;	right: 40%;}
+.lamp2{position: absolute;top: 49%;	right: 65%;}
+
+p {
+	position: absolute;
+	font-family: 'DSDIGI';
+	color:white;	
+	background-color:#666666;
+	border-radius: 10px;
+	box-shadow: 5px 5px 5px #888888;
+}
+p.datetime{top: -3%;	right: 13%;     font-size: 120%; }
+
+p.t1{
+	top: 30%;
+	right: 78%;
+	font-size: 250%;
+}
+p.h1 {
+	top: 47%;
+	right: 78%;
+	font-size: 250%;
+	}
+
+p.t2{
+	top: 28%;
+	right: 55%;
+	font-size: 250%;
+}
+p.h2{
+	top: 14%;
+	right: 41%;
+	font-size: 250%;
+}
+
+p.t3{
+	top: -1%;
+	right: 41%;
+	font-size: 250%;
+}
+p.h3{
+	top: 14%;
+	right: 30%;
+	font-size: 250%;
+}
+
+p.t4{
+	top: 17%;
+	right: 12%;
+	font-size: 250%;
+}
+p.h4{
+	top: 33%;
+	right: 13%;
+	font-size: 250%;
+}
+
+p.t5{
+	top: 75%;
+	right: 78%;
+	font-size: 250%;
+}
+p.h5{
+	top: 54%;
+	right: 62%;
+	font-size: 250%;
+}
+p.t6{
+	top: 78%;
+	right: 48%;
+	font-size: 250%;
+}
+p.h6{
+	top: 60%;
+	right: 48%;
+	font-size: 250%;
+}
+
+p.t7{
+	top: 45%;
+	right: 23%;
+	font-size: 250%;
+}
+p.h7{top: 62%;right: 38%;     font-size: 250%;}
+p.t8{top: 76%;right: 18%;     font-size: 250%;}
+p.h8{top: 62%;right: 18%;     font-size: 250%;}
+
+</style>
+</head>
+<body onLoad="callMacro_UpdateMonitor();" >
+<div id="page" data-role="page" data-theme="e">
+
+<a href="iosetting.htm" rel="external"><img class="setting" src="setting_icon.jpg" width="4%" /></a>
+
+<a href="config.htm" rel="external"><img class="settingnet" src="networkconfig_icon.png" width="4%" /></a>
+<a href="index.htm" rel="external"><img class="home" src="home.png" width="4%" /></a>
+
+<a href="http://ecapro.com.vn/" rel="external"><img class="logo" src="logodcen.png" width="10%" /></a>
+
+<img class="air1" src="fan_on.gif" id="out0" width="6%" 
+onclick="Output('1')"/>
+<img class="air2" src="fan_on.gif" id="out1"  width="6%"  
+onclick="Output('2')"/>
+<p class="datetime" id="timer"  ></p>
+
+
+<p class="t1" id="th1"> 0 </p>
+<p class="h1" id="th0"> 0 </p>
+<p class="t2" id="th11"> 0</p>
+<p class="h2" id="th6"> 0</p>
+<p class="t3" id="th7"> 0</p>
+<p class="h3" id="th9"> 0</p>
+<p class="t4" id="th5"> 0</p>
+<p class="h4" id="th4"> 0</p>
+<p class="t5" id="th12"> 0 </p>
+<p class="h5" id="th8"> 0 </p>
+<p class="t6" id="th2"> 0</p>
+<p class="h6" id="th3"> 0</p>
+<p class="t7" id="th10"> 0</p>
+</div>
+</body>
+</html>

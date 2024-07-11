@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_smokesetting",[], receiverdatas);
+		Flag=0;
+    }
+	//address1,address2,timeoutput3, mesalarm, mesnormal,name10,mode10,name11,mode11...
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('add1').value =		(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('add2').value =		(rcd.length > 1)? rcd[1] : "";
+				document.getElementById('timeout3').value =		(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('mesalarm').value =		(rcd.length > 3)? rcd[3] : "";
+				document.getElementById('mesnormal').value =		(rcd.length > 4)? rcd[4] : "";
+							
+				for(var i=0;i<10;i++)
+				{
+					document.getElementById('namechannel1'+i).value= (rcd.length > i*2+5)? rcd[i*2+5] : "";
+					document.getElementById('mode1'+i).value = 	(rcd.length > i*2+6)? rcd[i*2+6] : "";	
+					
+				}
+				for(var i=0;i<10;i++)
+				{
+					document.getElementById('namechannel2'+i).value= (rcd.length > i*2+25)? rcd[i*2+25] : "";
+					document.getElementById('mode2'+i).value = 	(rcd.length > i*2+26)? rcd[i*2+26] : "";	
+					
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+					
+			}
+		}
+    }
+	//Load cac du lieu cai dat
+	function Loadsetting()
+	{
+		// Call the macro
+        webiopi().callMacro("load_smokesetting",[], receiverdatas);
+		document.getElementById('result').innerHTML="Loaded Setting";
+		Flag=0;
+		
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('add1').value+';';
+		stringval=stringval+document.getElementById('add2').value+';';
+		stringval=stringval+document.getElementById('timeout3').value+';';
+		stringval=stringval+document.getElementById('mesalarm').value+';';
+		stringval=stringval+document.getElementById('mesnormal').value+';';
+		for(var i=0;i<10;i++)
+		{
+			if(document.getElementById('namechannel1'+i).value)
+			{
+				names=document.getElementById('namechannel1'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+			stringval=stringval+document.getElementById('mode1'+i).value+';';
+		}
+		for(var i=0;i<10;i++)
+		{
+			if(document.getElementById('namechannel2'+i).value)
+			{
+				names=document.getElementById('namechannel2'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+			stringval=stringval+document.getElementById('mode2'+i).value+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_smokesetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();">
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatorsetting.htm" style="text-decoration:none"><font size="4"><strong>Generator Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="airconsetting.htm" style="text-decoration:none"><font size="4"><strong>Air Con Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokesetting.htm" style="text-decoration:none"><font size="4"><strong>Smoke Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>SMOKE SENSOR SETTING </b></font></td></tr>		
+</table>
+
+    <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>INPUT</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Smoke Sensor Name</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Select Mode</strong></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>MODULE 1</strong></td>
+      </tr>
+      <tr align="center" id="channel0">
+        <td><strong>1</strong></td>
+        <td><input name="namechannel10" id="namechannel10" type="text" maxlength="18" /></td>
+        <td><select name="mode0" id="mode10">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel1">
+        <td><strong>2</strong></td>
+        <td><input name="namechannel11" id="namechannel11" type="text" maxlength="18" /></td>
+        <td><select name="mode1" id="mode11">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel2">
+        <td><strong>3</strong></td>
+        <td><input name="namechannel12" id="namechannel12" type="text" maxlength="18" /></td>
+        <td><select name="mode2" id="mode12">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel3">
+        <td><strong>4</strong></td>
+        <td><input name="namechannel13" id="namechannel13" type="text" maxlength="18" /></td>
+        <td><select name="mode3" id="mode13">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel4">
+        <td><strong>5</strong></td>
+        <td><input name="namechannel14" id="namechannel14" type="text" maxlength="18" /></td>
+        <td><select name="mode4" id="mode14">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel5">
+        <td><strong>6</strong></td>
+        <td><input name="namechannel15" id="namechannel15" type="text" maxlength="18" /></td>
+        <td><select name="mode5" id="mode15">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel6">
+        <td><strong>7</strong></td>
+        <td><input name="namechannel16" id="namechannel16" type="text" maxlength="18" /></td>
+        <td><select name="mode6" id="mode16">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel7">
+        <td><strong>8</strong></td>
+        <td><input name="namechannel17" id="namechannel17" type="text" maxlength="18" /></td>
+        <td><select name="mode7" id="mode17">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr  align="center" id="channel8">
+        <td><strong>9</strong></td>
+        <td><input name="namechannel18" id="namechannel18" type="text" maxlength="18" /></td>
+        <td><select name="mode8" id="mode18">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel9">
+        <td><strong>10</strong></td>
+        <td><input name="namechannel19" id="namechannel19" type="text" maxlength="18" /></td>
+        <td><select name="mode9" id="mode19">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>MODULE 2</strong></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>1</strong></td>
+        <td><input name="namechannel10" id="namechannel20" type="text" maxlength="18" /></td>
+        <td><select name="mode10" id="mode20">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel11">
+        <td><strong>2</strong></td>
+        <td><input name="namechannel11" id="namechannel21" type="text" maxlength="18" /></td>
+        <td><select name="mode11" id="mode21">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td><strong>3</strong></td>
+        <td><input name="namechannel12" id="namechannel22" type="text" maxlength="18" /></td>
+        <td><select name="mode12" id="mode22">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel13">
+        <td><strong>4</strong></td>
+        <td><input name="namechannel13" id="namechannel23" type="text" maxlength="18" /></td>
+        <td><select name="mode13" id="mode23">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td><strong>5</strong></td>
+        <td><input name="namechannel14" id="namechannel24" type="text" maxlength="18" /></td>
+        <td><select name="mode14" id="mode24">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel15">
+        <td><strong>6</strong></td>
+        <td><input name="namechannel15" id="namechannel25" type="text" maxlength="18" /></td>
+        <td><select name="mode15" id="mode25">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel16">
+        <td><strong>7</strong></td>
+        <td><input name="namechannel16" id="namechannel26" type="text" maxlength="18" /></td>
+        <td><select name="mode16" id="mode26">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel17">
+        <td><strong>8</strong></td>
+        <td><input name="namechannel17" id="namechannel27" type="text" maxlength="18" /></td>
+        <td><select name="mode17" id="mode27">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>9</strong></td>
+        <td><input name="namechannel18" id="namechannel28" type="text" maxlength="18" /></td>
+        <td><select name="mode18" id="mode28">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+      <tr align="center" id="channel19">
+        <td><strong>10</strong></td>
+        <td><input name="namechannel19" id="namechannel29" type="text" maxlength="18" /></td>
+        <td><select name="mode10" id="mode29">
+          <option value="0" >OPEN ALARM</option>
+          <option value="1" >CLOSE ALARM</option>
+          <option value="2" >NOT USE</option>
+        </select></td>
+      </tr>
+    </table>
+  <p>
+    <label><strong>Common Setting :</strong></label>
+    </p>
+    <table width="100%" border="1">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>Max Input Module 1 </strong></td>
+        <td bgcolor="#CCCCCC"><strong>Max Input Module 2</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Time Output3 Siren (min)</strong></td>
+      </tr>
+      <tr align="center">
+        <td><input name="add1" type="text" id="add1" maxlength="2" min="1" /></td>
+        <td><input name="add2" type="text" id="add2" maxlength="2" min="1" /></td>
+        <td><input name="tout3" id="timeout3" type="text" /></td>
+      </tr>
+    </table>
+    <p>
+      <label><strong>Message to SMS and Email:</strong></label>
+  </p>
+  <table width="100%" border="1">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>Message Alarm</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Message Normal</strong></td>
+      </tr>
+      <tr align="center">
+        <td><input name="mesalarm" type="text" id="mesalarm" maxlength="15" /></td>
+        <td><input name="mesnormal" type="text"  id="mesnormal" maxlength="15" /></td>
+      </tr>
+    </table>
+    <p><span id="result"></span></p>
+    <p>
+      <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+	</p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

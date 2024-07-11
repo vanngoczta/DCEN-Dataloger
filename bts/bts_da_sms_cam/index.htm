@@ -1,0 +1,412 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="description" content="ECA-GPIs6.6DA-SMS">
+<title>DCEN.VN GPIs6.6DA-SMS</title>
+<link rel="stylesheet" href="font.css">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+	var flag=0;
+	var flagbg=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var sensorunits=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var tempunits=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var indexstatus=0;
+	webiopi().ready(function() 
+	{	
+	});
+	// convenience: set data font
+    function dtaFont(val) {
+       return "<font size='3' face=\"arial\" >" + val + "</font>";
+    }
+	function Output(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("Output_iosetting", index, ReceiverStatusOut);
+    }
+	//Tach du lieu ten cac dau vao canh bao
+	function ReceiverStatusOut(macro, args, text)
+	{	
+		if (text != null) 
+		{
+			var fld = text.split(',');
+			if (fld.length >= 1) 
+			{	//alert(fld);
+				for(var i=0;i<6;i++)
+				{
+					var output=(fld.length > i)? fld[i] : "";
+					var indexout=i+1;
+					if(output=='1' && i==5)
+					{	
+						document.getElementById('out'+i).style.width="4%";
+					}
+					else if(output=='0' && i==5)
+					{	
+						document.getElementById('out'+i).style.width="4.5%";		
+					}	
+				}
+			}
+		}
+	}
+	function ReceiverUpdateMonitor(macro, args, text) 
+	{
+        if (text != null) 
+		{
+			var rcd = text.split('\r\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{
+				var flagindex = 0;
+				var tableData = "";
+				// Time | channel | namechannel | value | unit | status | Input | Output
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					if (rcd[i].trim() != "") 
+					{	
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+							var time		  = 	(fld.length > 0)? fld[0] : "";
+							var channel		=  (fld.length > 1)? fld[1] : "";
+							var name 		 = 	(fld.length > 2)? fld[2] : "";
+							var value  		= 	(fld.length > 3)? fld[3] : "";
+							var units  		= 	(fld.length > 4)? fld[4] : "";
+							var status  		= 	(fld.length > 5)? fld[5] : "";
+							var strstatus="";
+							if(document.getElementById('namesensor'+i))
+							{	var indexv=i+1;
+								document.getElementById('namesensor'+i).innerHTML="<a href=historytrend.htm?channel="+i+">"+indexv+'. '+name+"</a>";
+							}
+							if(document.getElementById('valuesensor'+i))
+								document.getElementById('valuesensor'+i).innerHTML=value+' '+dtaFont(units);
+							if(status==0)
+							{
+								strstatus="Not connect";
+								if(document.getElementById('valuesensor'+i))
+									document.getElementById('valuesensor'+i).style.backgroundColor="gray";
+							}
+							else if(status==1)
+							{
+								strstatus="Connected";
+								if(document.getElementById('valuesensor'+i))
+									document.getElementById('valuesensor'+i).style.backgroundColor="black";
+							}
+							else if(status==2)
+							{	
+								strstatus="Low Alarm";
+								if(flagbg[i]==0)
+								{
+									if(document.getElementById('valuesensor'+i))
+										document.getElementById('valuesensor'+i).style.backgroundColor="yellow";
+									flagbg[i]=1;
+								}
+								else
+								{
+									if(document.getElementById('valuesensor'+i))
+										document.getElementById('valuesensor'+i).style.backgroundColor="black";
+									flagbg[i]=0;
+								}
+							}
+							else if(status==3)
+							{	
+								strstatus="High Alarm";
+								if(flagbg[i]==0)
+								{
+									if(document.getElementById('valuesensor'+i))
+										document.getElementById('valuesensor'+i).style.backgroundColor="red";
+									flagbg[i]=1;
+								}
+								else
+								{
+									if(document.getElementById('valuesensor'+i))
+										document.getElementById('valuesensor'+i).style.backgroundColor="black";
+									flagbg[i]=0;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+    }
+	// Following function will process data received from 
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+  	function callMacro_UpdateMonitor()
+    {
+		if(flag==0)
+		{
+			flag=1;
+       		// Get data from macro
+	   		webiopi().callMacro("UpdateMonitor", [], ReceiverUpdateMonitor );	
+		}
+	   	else if(flag==1)
+	   	{	
+			flag=0;
+			Output('10');
+	   		webiopi().callMacro("UpdateStatus",[], receiverUpdateStatus);
+	   	}
+		document.getElementById('image0').src="cam1.jpg"+ "?" + Math.random();
+		document.getElementById('image1').src="cam2.jpg"+ "?" + Math.random();
+		/*var d = new Date();
+		var n = d.toLocaleString();
+		document.getElementById('timer').innerHTML=n;*/
+	}
+	//Trang thai thiet bi	
+	function receiverUpdateStatus(macro, args, response) 
+	{
+		var d = new Date();
+		var n = d.toLocaleString();
+		var rcd = response.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	
+						if(indexstatus==0)
+						{	document.getElementById('timer').innerHTML=(fld.length > 3)? fld[3] : "";
+							indexstatus=1;
+						}
+						else if(indexstatus==1)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 4)? fld[4] : "";
+							indexstatus=2;
+						}
+						else if(indexstatus==2)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 4)? fld[4] : "";
+							indexstatus=3;
+						}
+						else if(indexstatus==3)
+						{
+							document.getElementById('timer').innerHTML=(fld.length > 4)? fld[4] : "";
+							indexstatus=4;
+						}
+						else if(indexstatus==4)
+						{
+							var today=new Date();
+							var h=today.getHours();
+							var m=today.getMinutes();
+							var s=today.getSeconds();
+							var n = today.toLocaleString();
+							document.getElementById('timer').innerHTML=n;
+							//document.getElementById('timer').innerHTML=h+":"+m+":"+s;
+							indexstatus=0;
+						}
+					}
+				}
+			}
+		}
+	}
+	//------------------------------------------------------------
+</script>
+<style type="text/css">
+body  {
+	background-color: black;
+}
+/* unvisited link */
+a:link {
+    color: red;
+}
+/* visited link */
+a:visited {
+    color: green;
+}
+/* mouse over link */
+a:hover {
+    color: hotpink;
+}
+/* selected link */
+a:active {
+    color: blue;
+}
+p {
+	position: absolute;
+	font-family: 'DSDIGI';
+	color:white;	
+	border-radius: 6px;
+	box-shadow: 2px 2px 2px #888888;
+}
+.home
+{
+	position: absolute;
+	top: 0%;
+	right: 94.5%;
+}
+.setting
+{
+	position: absolute;
+	top: 0%;
+	right: 86%;
+}
+.settingnet
+{
+	position: absolute;
+	top: 0%;
+	right: 78%;
+}
+.modbusset
+{
+	position: absolute;
+	top: 0%;
+	right: 70%;
+}
+.sample
+{
+	position: absolute;
+	top: 0%;
+	right: 62%;
+}
+.graph
+{
+	position: absolute;
+	top: 0%;
+	right: 70%;
+}
+.logo
+{
+	position: absolute;
+	top: 1%;
+	right: 1%;
+}
+textarea {
+  position: absolute;
+  top: 75%;
+  right: 1%;
+}
+.cam1
+{
+	position: absolute;
+	top: 9%;
+	right: 0.2%;
+}
+.cam2
+{
+	position: absolute;
+	top: 54%;
+	right: 0.2%;
+}
+p.datetime{top: 0%;	right: 13%;     font-size: 100%; font-family:Arial, Helvetica, sans-serif; }
+
+p.v1{
+	top: 12%;left: 2%;font-size: 350%;
+}
+p.v2 {
+	top: 12%;left: 34%; font-size: 350%;
+	}
+	
+p.v3{
+	top: 42%;left: 2%;font-size: 350%;
+}
+p.v4{
+	top: 42%;left: 34%;font-size: 350%;
+}
+
+p.v5{
+	top: 72%;left: 2%;font-size: 350%;
+}
+p.v6{
+	top: 72%;left: 34%;font-size: 350%;
+}
+
+
+.name1{
+	top: 9%;left: 2%; font-family:Arial; font-size: 200%; color:white;
+}
+.name2{
+	top: 9%;left: 34%; font-family:Arial; font-size: 200%;color:white;
+}
+
+.name3{
+	top: 39%;left: 2%; font-family:Arial; font-size: 200%;color:white;
+}
+.name4{
+	top: 39%;left: 34%; font-family:Arial;font-size: 200%; color:white;
+}
+.name5{
+	top: 69%;left: 2%; font-family:Arial;font-size: 200%; color:white;
+}
+.name6{
+	top: 69%;left: 34%;  font-family:Arial; font-size: 200%; color:white;
+}
+
+p.a1{top: 37%;right: 84.5%;font-size: 200%;}
+p.a2 {top: 42%;right: 84.5%; font-size: 200%;}
+p.a3{top: 47%;right: 84.5%;font-size: 200%;}
+
+p.a4{top: 37%;right: 67%;font-size: 200%;}
+p.a5{top: 42%;right: 67%;font-size: 200%;}
+p.a6{top: 47%;right: 67%;font-size: 200%;}
+
+p.a7{top: 37%;right: 50%;font-size: 200%;}
+p.a8{top: 42%;right: 50%;font-size: 200%;}
+p.a9{top: 47%;right: 50%;font-size: 200%;}
+
+p.a10{top: 37%;right: 33%;font-size: 200%;}
+p.a11{top: 42%;right: 33%;font-size: 200%;}
+p.a12{top: 47%;right: 33%;font-size: 200%;}
+
+p.a13{top: 37%;right: 16%;font-size: 200%;}
+p.a14{top: 42%;right: 16%;font-size: 200%;}
+p.a15{top: 47%;right: 16%;font-size: 200%;}
+
+p.p1{top: 67%;right: 84.5%;font-size: 200%;}
+p.p2{top: 72%;right: 84.5%; font-size: 200%;}
+p.p3{top: 77%;right: 84.5%;font-size: 200%;}
+
+p.p4{top: 67%;right: 67%;font-size: 200%;}
+p.p5{top: 72%;right: 67%;font-size: 200%;}
+p.p6{top: 77%;right: 67%;font-size: 200%;}
+
+p.p7{top: 67%;right: 50%;font-size: 200%;}
+p.p8{top: 72%;right: 50%;font-size: 200%;}
+p.p9{top: 77%;right: 50%;font-size: 200%;}
+
+p.p10{top: 67%;right: 33%;font-size: 200%;}
+p.p11{top: 72%;right: 33%;font-size: 200%;}
+p.p12{top: 77%;right: 33%;font-size: 200%;}
+
+p.p13{top: 67%;right: 16%;font-size: 200%;}
+p.p14{top: 72%;right: 16%;font-size: 200%;}
+p.p15{top: 77%;right: 16%;font-size: 200%;}
+
+</style>
+</head>
+<body>
+<a href="networksetting.html" rel="external"><img class="setting" src="networkconfig_icon.png" width="4.2%" /></a>
+<a href="index2.htm" rel="external"><img class="home" src="home.png" width="4.2%" /></a>
+<a href="historytrend.htm" rel="external"><img class="settingnet" src="graph_icon.jpg" width="4.2%" /></a>
+<a href="modbussetting.htm" rel="external"><img class="modbusset" src="modbus_icon.png" width="4.2%" /></a>
+<img class="sample" id="out5" src="sample.png" width="4.2%" onClick="Output('6')" />
+<a href="index2.htm" rel="external"><img class="logo" src="logodcen.png" width="10%" /></a>
+
+
+<p class="datetime" id="timer" ></p>
+<p class="name1" id="namesensor0"></p>
+<p class="name2" id="namesensor1"></p>
+<p class="name3" id="namesensor2"></p>
+<p class="name4" id="namesensor3"></p>
+<p class="name5" id="namesensor4"></p>
+<p class="name6" id="namesensor5"></p>
+
+
+<a href="cam1.jpg" target="_blank"><img class="cam1" src="cam1.jpg" alt=""  width="39%" id="image0" /></a>
+<a href="cam2.jpg" target="_blank"><img class="cam2" src="cam2.jpg" alt=""  width="39%" id="image1" /></a>
+
+<p class="v1" id="valuesensor0">0</p>
+<p class="v2" id="valuesensor1">0</p>
+<p class="v3" id="valuesensor2"></p>
+<p class="v4" id="valuesensor3"></p>
+<p class="v5" id="valuesensor4"></p>
+<p class="v6" id="valuesensor5"></p>
+
+
+
+</div>
+</body>
+</html>

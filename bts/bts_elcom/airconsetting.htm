@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_airsetting",[], receiverdatas);
+		Flag=0;
+    }
+	//timerefresh,numberchannel,namechannel0,address0,mode0,low
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('timerefresh').value =		(rcd.length > 0)? rcd[0] : "";
+				var maxchannel=(rcd.length > 1)? rcd[1] : "";
+				document.getElementById('numberchannel').value= maxchannel;	
+							
+				for(var i=0;i<10;i++)
+				{		
+					if(i>=maxchannel)
+						document.getElementById('channel'+i).style.display="none";
+					document.getElementById('namechannel'+i).value= (rcd.length > i*5+2)? rcd[i*5+2] : "";
+					document.getElementById('address'+i).value = 	(rcd.length > i*5+3)? rcd[i*5+3] : "";
+					document.getElementById('mode'+i).value = 		(rcd.length > i*5+4)? rcd[i*5+4] : "";
+					document.getElementById('lo'+i).value = 	 	(rcd.length > i*5+5)? rcd[i*5+5] : "";
+					document.getElementById('hi'+i).value = 		(rcd.length > i*5+6)? rcd[i*5+6] : "";		
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+					
+			}
+		}
+    }
+	//Load cac du lieu cai dat
+	function Loadsetting()
+	{
+		// Call the macro
+        webiopi().callMacro("load_airsetting",[], receiverdatas);
+		document.getElementById('result').innerHTML="Loaded Setting";
+		Flag=0;
+		
+	}
+	//Ghi du lieu
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('timerefresh').value+';';
+		var maxchannel=document.getElementById('numberchannel').value;
+		stringval=stringval+maxchannel+';';
+
+		for(var i=0;i<10;i++)
+		{
+			if(i>=maxchannel)
+				document.getElementById('channel'+i).style.display="none";
+			if(document.getElementById('namechannel'+i).value)
+			{
+				names=document.getElementById('namechannel'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+namesnew+';';
+			}
+			else
+				return;
+			if(document.getElementById('address'+i).value)
+				stringval=stringval+document.getElementById('address'+i).value+';';
+			else
+				return;
+			stringval=stringval+document.getElementById('mode'+i).value+';';
+			stringval=stringval+document.getElementById('lo'+i).value+';';
+			stringval=stringval+document.getElementById('hi'+i).value+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_airsetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();">
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatorsetting.htm" style="text-decoration:none"><font size="4"><strong>Generator Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="airconsetting.htm" style="text-decoration:none"><font size="4"><strong>Air Con Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokesetting.htm" style="text-decoration:none"><font size="4"><strong>Smoke Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>AIR CONDITION SETTING (Chế độ tự động sẽ được điều khiển theo giá trị nhiệt độ của 10 kênh đầu tiên)</b></font></td></tr>		
+</table>
+
+    <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>Air Condition Name</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Address Slave </strong></td>
+        <td bgcolor="#CCCCCC"><strong>Select Mode</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Low Setpoint</strong></td>
+        <td bgcolor="#CCCCCC"><strong>High Setpoint</strong></td>
+      </tr>
+      <tr align="center" id="channel0">
+        <td><input name="na0" id="namechannel0" type="text" maxlength="18" /></td>
+        <td><input name="as0" id="address0" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode0" id="mode0">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo0"  size="6" /></td>
+        <td><input type="text"  id="hi0"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel1">
+        <td><input name="namechannel" id="namechannel1" type="text" maxlength="18" /></td>
+        <td><input name="address1" id="address1" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode1" id="mode1">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo1"  size="6" /></td>
+        <td><input type="text"  id="hi1"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel2">
+        <td><input name="namechannel" id="namechannel2" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address2" type="text"  maxlength="3" size="3"/></td>
+        <td><select name="mode2" id="mode2">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo2"  size="6" /></td>
+        <td><input type="text"  id="hi2"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel3">
+        <td><input name="namechannel" id="namechannel3" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address3" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode3" id="mode3">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo3"  size="6" /></td>
+        <td><input type="text"  id="hi3"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel4">
+        <td><input name="namechannel" id="namechannel4" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address4" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode4" id="mode4">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo4"  size="6" /></td>
+        <td><input type="text"  id="hi4"  size="6" /></td>
+      </tr>
+      <tr  align="center" id="channel5">
+        <td><input name="namechannel" id="namechannel5" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address5" type="text"  maxlength="3" size="3"/></td>
+        <td><select name="mode5" id="mode5">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo5"  size="6" /></td>
+        <td><input type="text"  id="hi5"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel6">
+        <td><input name="namechannel" id="namechannel6" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address6" type="text"  maxlength="3" size="3"/></td>
+        <td><select name="mode6" id="mode6">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo6"  size="6" /></td>
+        <td><input type="text"  id="hi6"  size="6" /></td>
+      </tr>
+      <tr  align="center" id="channel7">
+        <td><input name="namechannel" id="namechannel7" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address7" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode7" id="mode7">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo7"  size="6" /></td>
+        <td><input type="text"  id="hi7"  size="6" /></td>
+      </tr>
+      <tr  align="center" id="channel8">
+        <td><input name="namechannel" id="namechannel8" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address8" type="text"  maxlength="3" size="3"/></td>
+        <td><select name="mode8" id="mode8">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo8"  size="6" /></td>
+        <td><input type="text"  id="hi8"  size="6" /></td>
+      </tr>
+      <tr align="center" id="channel9">
+        <td><input name="namechannel" id="namechannel9" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address9" type="text"  maxlength="3" size="3" /></td>
+        <td><select name="mode9" id="mode9">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><input type="text"  id="lo9"  size="6" /></td>
+        <td><input type="text"  id="hi9"  size="6" /></td>
+      </tr>
+    </table>
+    <p>
+    </p>
+  <table width="100%" border="1">
+      <tr>
+        <td bgcolor="#CCCCCC"><strong>Refresh  Interval (min)</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Max Channel (10)</strong></td>
+    </tr>
+      <tr>
+        <td><input name="time" type="text" id="timerefresh" maxlength="2" min="1" /></td>
+        <td><input name="mso" id="numberchannel" type="text" min="1" max="21" /></td>
+      </tr>
+  </table>
+  <span id="result"></span> 
+  <p>
+    <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+  </p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

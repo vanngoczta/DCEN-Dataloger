@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>AIR CONTROL ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	// Dieu khien loi ra ECA-TH485IR
+	function OutputAir(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("OutputAir",index, receiverdatas);
+    }
+	setInterval ("callMacro_UpdateModule()", 1000);
+	{}
+	//Thuc hien onload
+	function callMacro_UpdateModule()
+    {
+       // Get data from macro
+	   	webiopi().callMacro("UpdateModuleAir", [], receiverdatas);
+	}
+	//numberchannel,namechannel0,out0,mode0,status0...
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				var maxchannel=(rcd.length > 0)? rcd[0] : "";
+				//document.getElementById('numberchannel').value= maxchannel;			
+				for(var i=0;i<10;i++)
+				{
+					if(i>=maxchannel)
+						document.getElementById('channel'+i).style.display="none";
+					var name= 			(rcd.length > i*7+1)? rcd[i*7+1] : "";
+					document.getElementById('outair'+i).value=name;
+					var out=			(rcd.length > i*7+2)? rcd[i*7+2] : "";
+					if(out=='1')
+						document.getElementById('outair'+i).style.color="black";
+					else
+						document.getElementById('outair'+i).style.color="gray";
+					document.getElementById('mode'+i).value = 		 (rcd.length > i*7+3)? rcd[i*7+3] : "";
+					document.getElementById('temp'+i).innerHTML = 	(rcd.length > i*7+4)? rcd[i*7+4] : "";
+					document.getElementById('low'+i).innerHTML = 	(rcd.length > i*7+5)? rcd[i*7+5] : "";
+					document.getElementById('high'+i).innerHTML = 	(rcd.length > i*7+6)? rcd[i*7+6] : "";
+					status=(rcd.length > i*7+7)? rcd[i*7+7] : "";
+					if(status==0)
+						document.getElementById('status'+i).innerHTML = 	"Not connect";
+					else
+						document.getElementById('status'+i).innerHTML = 	"Connecting";
+				}			
+			}
+		}
+    }
+</script>
+<body bgcolor="white" onload="callMacro_UpdateModule();">
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokemonitor.htm" style="text-decoration:none"><font size="4"><strong>Smoke Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="aircontrol.htm" style="text-decoration:none"><font size="4"><strong>Air Control</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatormonitor.htm" style="text-decoration:none"><font size="4"><strong>Generator Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="airconsetting.htm" style="text-decoration:none"><font size="4"><strong>Air Con Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="generatorsetting.htm" style="text-decoration:none"><font size="4"><strong>Generator Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>AIR CONDITION CONTROL (Chế độ tự động sẽ được điều khiển theo giá trị nhiệt độ của 10 kênh đầu tiên Page1)</b></font></td></tr>		
+</table>
+
+    <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>Air Condition </strong></td>
+        <td bgcolor="#CCCCCC"><strong>Mode</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Temperature oC</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Low Setpoint oC</strong></td>
+        <td bgcolor="#CCCCCC"><strong>High Setpoint oC</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Status</strong></td>
+      </tr>
+      <tr align="center" id="channel0">
+        <td><input type="button" id="outair0" value="Điều hòa 1" onclick="OutputAir('0')" /></td>
+        <td><select name="mode0" id="mode0">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp0'></span></td>
+        <td><span id='low0'></span></td>
+        <td><span id='high0'></span></td>
+        <td id='colorair0'><center><span id='status0'></span></center></td>
+      </tr>
+      <tr align="center" id="channel1">
+        <td><input type="button" id="outair1" value="Điều hòa 1" onclick="OutputAir('1')" /></td>
+        <td><select name="mode1" id="mode1">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp1'></span></td>
+        <td><span id='low1'></span></td>
+        <td><span id='high1'></span></td>
+        <td id='colorair1'><center>
+          <span id='status1'></span>
+        </center></td>
+      </tr>
+      <tr align="center" id="channel2">
+        <td><input type="button" id="outair2" value="Điều hòa 1" onclick="OutputAir('2')" /></td>
+        <td><select name="mode2" id="mode2">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp2'></span></td>
+        <td><span id='low2'></span></td>
+        <td><span id='high2'></span></td>
+        <td id='colorair2'><center>
+          <span id='status2'></span>
+        </center></td>
+      </tr>
+      <tr align="center" id="channel3">
+        <td><input type="button" id="outair3" value="Điều hòa 1" onclick="OutputAir('3')" /></td>
+        <td><select name="mode3" id="mode3">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp3'></span></td>
+        <td><span id='low3'></span></td>
+        <td><span id='high3'></span></td>
+        <td id='colorair3'><center>
+          <span id='status3'></span>
+        </center></td>
+      </tr>
+      <tr align="center" id="channel4">
+        <td><input type="button" id="outair4" value="Điều hòa 1" onclick="OutputAir('4')" /></td>
+        <td><select name="mode4" id="mode4">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp4'></span></td>
+        <td><span id='low4'></span></td>
+        <td><span id='high4'></span></td>
+        <td id='colorair4'><center>
+          <span id='status4'></span>
+        </center></td>
+      </tr>
+      <tr  align="center" id="channel5">
+        <td><input type="button" id="outair5" value="Điều hòa 1" onclick="OutputAir('5')" /></td>
+        <td><select name="mode5" id="mode5">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp5'></span></td>
+        <td><span id='low5'></span></td>
+        <td><span id='high5'></span></td>
+        <td id='colorair5'><center>
+          <span id='status5'></span>
+        </center></td>
+      </tr>
+      <tr align="center" id="channel6">
+        <td><input type="button" id="outair6" value="Điều hòa 1" onclick="OutputAir('6')" /></td>
+        <td><select name="mode6" id="mode6">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp6'></span></td>
+        <td><span id='low6'></span></td>
+        <td><span id='high6'></span></td>
+        <td id='colorair6'><center>
+          <span id='status6'></span>
+        </center></td>
+      </tr>
+      <tr  align="center" id="channel7">
+        <td><input type="button" id="outair7" value="Điều hòa 1" onclick="OutputAir('7')" /></td>
+        <td><select name="mode7" id="mode7">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp7'></span></td>
+        <td><span id='low7'></span></td>
+        <td><span id='high7'></span></td>
+        <td id='colorair7'><center>
+          <span id='status7'></span>
+        </center></td>
+      </tr>
+      <tr  align="center" id="channel8">
+        <td><input type="button" id="outair8" value="Điều hòa 1" onclick="OutputAir('8')" /></td>
+        <td><select name="mode8" id="mode8">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp8'></span></td>
+        <td><span id='low8'></span></td>
+        <td><span id='high8'></span></td>
+        <td id='colorair8'><center>
+          <span id='status8'></span>
+        </center></td>
+      </tr>
+      <tr align="center" id="channel9">
+        <td><input type="button" id="outair9" value="Điều hòa 1" onclick="OutputAir('9')" /></td>
+        <td><select name="mode9" id="mode9">
+          <option value="0" >AUTO</option>
+          <option value="1" >MANUAL</option>
+          
+        </select></td>
+        <td><span id='temp9'></span></td>
+        <td><span id='low9'></span></td>
+        <td><span id='high9'></span></td>
+        <td id='colorair9'><center>
+          <span id='status9'></span>
+        </center></td>
+      </tr>
+    </table>
+
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

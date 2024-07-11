@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Scheduler ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_schedulersetting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				for(var i=0;i<10;i++)
+				{
+
+					document.getElementById('ton'+i).value= 	(rcd.length > i*4+0)? rcd[i*4+0] : "";
+					document.getElementById('tof'+i).value = 	(rcd.length > i*4+1)? rcd[i*4+1] : "";
+					document.getElementById('wd'+i).value = 	(rcd.length > i*4+2)? rcd[i*4+2] : "";
+					document.getElementById('sa'+i).value = 	 (rcd.length > i*4+3)? rcd[i*4+3] : "";
+					
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<10;i++)
+		{
+
+			stringval=stringval+document.getElementById('ton'+i).value+';';
+			stringval=stringval+document.getElementById('tof'+i).value+';';
+			stringval=stringval+document.getElementById('wd'+i).value+';';
+			stringval=stringval+document.getElementById('sa'+i).value+';';
+
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_schedulersetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="calibrationsetting.htm">Calibration Setting</a>
+    <a href="functionssetting.htm">Function Setting</a>
+    <a class="active" href="schedulersetting.htm">Scheduler Setting</a>
+    <a href="iosetting.htm">IO Setting</a>
+    <a href="networksetting.html">Network Setting</a>
+</div>
+<div>
+<table width="100%" border="1">
+  <tr>
+    <th bgcolor="#CCCCCC"><strong>STT</strong></th>
+    <th bgcolor="#CCCCCC"><strong>Timer On</strong></th>
+    <th bgcolor="#CCCCCC"><strong>Timer Off</strong></th>
+    <th bgcolor="#CCCCCC"><strong>Select Weekday</strong></th>
+    <th bgcolor="#CCCCCC"><strong>Select Control</strong></th>
+    </tr>
+  <tr align="center">
+    <td>1</td>
+    <td><input name="to0" type="time" id="ton0" max="23" min="0" /></td>
+    <td><input name="tf0" type="time" id="tof0"  max="23" min="0" /></td>
+    <td><select id="wd0">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa0">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>2</td>
+    <td><input name="to1" type="time" id="ton1" max="23" min="0" /></td>
+    <td><input name="tf1" type="time" id="tof1" max="23" min="0" /></td>
+    <td><select id="wd1">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa1">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>3</td>
+    <td><input name="to2" type="time" id="ton2" max="23" min="0" /></td>
+    <td><input name="tf2" type="time" id="tof2"  max="23" min="0" /></td>
+    <td><select id="wd2">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa2">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>4</td>
+    <td><input name="to3" type="time" id="ton3" max="23" min="0" /></td>
+    <td><input name="tf3" type="time" id="tof3"   max="23" min="0" /></td>
+    <td><select id="wd3">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa3">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>5</td>
+    <td><input name="to4" type="time" id="ton4" max="23" min="0" /></td>
+    <td><input name="tf4" type="time"  id="tof4" max="23" min="0" /></td>
+    <td><select id="wd4">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa4">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>6</td>
+    <td><input name="to5" type="time" id="ton5" max="23" min="0" /></td>
+    <td><input name="tf5" type="time"  id="tof5"  max="23" min="0" /></td>
+    <td><select id="wd5">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa5">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>7</td>
+    <td><input name="to6" type="time" id="ton6" max="23" min="0" /></td>
+    <td><input name="tf6" type="time"  id="tof6" max="23" min="0" /></td>
+    <td><select id="wd6">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa6">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr  align="center">
+    <td>8</td>
+    <td><input name="to7" type="time" id="ton7" max="23" min="0" /></td>
+    <td><input name="tf7" type="time"  id="tof7"  max="23" min="0" /></td>
+    <td><select id="wd7">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa7">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr align="center">
+    <td>9</td>
+    <td><input name="to8" type="time" id="ton8" max="23" min="0" /></td>
+    <td><input name="tf8" type="time"  id="tof8"  max="23" min="0" /></td>
+    <td><select id="wd8">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+      </select></td>
+    <td><select id="sa8">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+  <tr align="center">
+    <td>10</td>
+    <td><input name="to9" type="time" id="ton9" max="23" min="0" /></td>
+    <td><input name="tf9" type="time"  id="tof9"  max="23" min="0" /></td>
+    <td><select id="wd9">
+      <option value="0">A Week</option>
+      <option value="1">Monday to Friday</option>
+      <option value="2">Saturday</option>
+      <option value="3">Sunday</option>
+    </select></td>
+    <td><select id="sa9">
+      <option value="0">Not used</option>
+      <option value="1">Input1</option>
+      <option value="2">Input2</option>
+      <option value="3">Input3</option>
+      <option value="4">Input4</option>
+      <option value="5">Input All</option>
+      <option value="6">Alarm on/off</option>
+      <option value="7">Output4 on/off</option>
+      <option value="8">Output5 on/off</option>
+      <option value="9">Output6 on/off</option>
+    </select></td>
+    </tr>
+</table>
+<span id="result"></span> 
+<p>
+  <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+</p>
+     </form>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2017 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V1217</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

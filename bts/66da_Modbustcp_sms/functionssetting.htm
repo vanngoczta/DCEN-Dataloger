@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+var gain=[],offset=[];
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_calibrationsetting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split(';');
+			if (rcd.length >= 1) 
+			{
+				for(var i=0;i<21;i++)
+				{
+					gain[i]= 	   (rcd.length > i*7+0)? rcd[i*7+0] : "";
+					offset[i] = 	(rcd.length > i*7+1)? rcd[i*7+1] : "";
+					document.getElementById('namechannel'+i).value=(rcd.length > i*7+2)? rcd[i*7+2] : "";
+					document.getElementById('readmodbus'+i).value= (rcd.length > i*7+3)? rcd[i*7+3] : "";
+					document.getElementById('realvalue'+i).value=  (rcd.length > i*7+4)? rcd[i*7+4] : "";
+					document.getElementById('un'+i).value=         (rcd.length > i*7+5)? rcd[i*7+5] : "";
+					document.getElementById('func'+i).value=         (rcd.length > i*7+6)? rcd[i*7+6] : "";
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<21;i++)
+		{
+			stringval=stringval+gain[i]+';';
+			stringval=stringval+offset[i]+';';
+			if(document.getElementById('func'+i))
+			{	
+				var functionstr=document.getElementById('func'+i).value;
+				var re=new RegExp(',', 'g');
+				var functions=functionstr.replace(re,'^');
+				var re=new RegExp('/', 'g');
+				var functions1=functions.replace(re,'~');
+				stringval=stringval+functions1+';';
+			}
+			else
+			{	alert("Error:"+i)
+				return;
+			}
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_calibrationsetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}	
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  dropdown[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var dropdownContent = this.nextElementSibling;
+    if (dropdownContent.style.display === "block") {
+      dropdownContent.style.display = "none";
+    } else {
+      dropdownContent.style.display = "block";
+    }
+  });
+}
+window.onscroll = function() {myFunction()};
+var navbar = document.getElementById("navbar");
+var sticky = navbar.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="calibrationsetting.htm">Calibration Setting</a>
+    <a class="active" href="functionssetting.htm">Function Setting</a>
+    <a href="schedulersetting.htm">Scheduler Setting</a>
+    <a href="iosetting.htm">IO Setting</a>
+    <a href="networksetting.html">Network Setting</a>
+</div>
+  <p>
+    <b>CaL.ReV[Idx] = Rea.Val[Idx]*CaL.gain[Idx]+CaL.offset[Idx], Idx=0-20</b> </p>
+  <p>math.exp(x), math.log(x[,&nbsp;base]), math.log10(x), math.pow(x,&nbsp;y), math.sqrt(x), math.acos(x), math.asin(x), math.pi, math.hypot(x,&nbsp;y), round(x,2)</p>
+  <table width="100%" border="1" cellspacing="1" id="12">
+    <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Idx/ Name Channel</strong></td>
+    <td bgcolor="#CCCCCC"><b>Rea.Val[Idx]</b></td>
+    <td bgcolor="#CCCCCC"><strong>Functions</strong></td>
+    <td bgcolor="#CCCCCC"><strong> <b>CaL.ReV[Idx]</b></strong></td>
+    <td bgcolor="#CCCCCC"><strong>Unit</strong></td>
+  </tr>
+  <tr id="channel0"  >
+    <td>0
+      <input name="na0" id="namechannel0" type="text" size="12" disabled  > </td>
+    <td><input name="as0" size="8"  id="readmodbus0" type="text" disabled ></td>
+    <td><input  type="text" size="110" id='func0'  /></td>
+    <td><input name="lo0" type="text"   size="8"  id="realvalue0"   disabled /></td>
+    <td><input name="un0" type="text"  id="un0" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel" >
+    <td>1
+      <input name="namechannel" id="namechannel1" type="text" size="12" disabled  /></td>
+    <td><input name="address1" size="8"  id="readmodbus1" type="text" disabled   /></td>
+    <td><input  type="text" size="110" id='func1'  /></td>
+    <td><input name="lo1" type="text"   size="8"  id="realvalue1" disabled  /></td>
+    <td><input name="un1" type="text"  id="un1" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel18" >
+    <td>2
+      <input name="namechannel" id="namechannel2" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus2" type="text" disabled  /></td>
+    <td><input  type="text" size="110" id='func2'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue2" disabled  /></td>
+    <td><input name="un" type="text"  id="un2" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel19" >
+    <td>3
+      <input name="namechannel" id="namechannel3" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus3" type="text"  disabled  /></td>
+    <td><input  type="text" size="110" id='func3'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue3" disabled  /></td>
+    <td><input name="un" type="text"  id="un3" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel20" >
+    <td>4
+      <input name="namechannel" id="namechannel4" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus4" type="text" disabled   /></td>
+    <td><input  type="text" size="110" id='func4'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue4" disabled  /></td>
+    <td><input name="un" type="text"  id="un4" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel21" >
+    <td>5
+      <input name="namechannel" id="namechannel5" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus5" type="text" disabled  /></td>
+    <td><input  type="text" size="110" id='func5'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue5" disabled  /></td>
+    <td><input name="un" type="text"  id="un5" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel22" >
+    <td>6
+      <input name="namechannel4" id="namechannel6" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus6" type="text" disabled  /></td>
+    <td><input  type="text" size="110" id='func6'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue6" disabled  /></td>
+    <td><input name="un" type="text"  id="un6" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel23" >
+    <td>7
+      <input name="namechannel" id="namechannel7" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus7" type="text" disabled   /></td>
+    <td><input  type="text" size="110" id='func7'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue7" disabled  /></td>
+    <td><input name="un" type="text"  id="un7" size="3" maxlength="3" disabled  /></td>
+  </tr>
+  <tr id="channel24"  >
+    <td>8
+      <input name="namechannel" id="namechannel8" type="text" size="12" disabled  /></td>
+    <td><input name="readanalog" size="8"  id="readmodbus8" type="text" disabled  /></td>
+    <td><input  type="text" size="110" id='func8'  /></td>
+    <td><input name="lo" type="text"   size="8"  id="realvalue8" disabled  /></td>
+    <td><input name="un" type="text"  id="un8" size="3" maxlength="3" disabled  /></td>
+  </tr>
+    <tr id="channel25"  >
+      <td>9
+      <input name="namechannel" id="namechannel9" type="text" size="12" disabled  /></td>
+      <td><input name="readanalog" size="8"  id="readmodbus9" type="text" disabled   /></td>
+      <td><input  type="text" size="110" id='func9'  /></td>
+      <td><input name="lo" type="text"   size="8"  id="realvalue9" disabled  /></td>
+      <td><input name="un" type="text"  id="un9" size="3" maxlength="3" disabled  /></td>
+    </tr>
+      <tr id="channel26"  >
+        <td>10
+        <input name="namechannel" id="namechannel10" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus10" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func10'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue10" disabled  /></td>
+        <td><input name="un" type="text"  id="un10" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel27"  >
+        <td>11
+        <input name="namechannel" id="namechannel11" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus11" type="text"  disabled  /></td>
+        <td><input  type="text" size="110" id='func11'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue11" disabled  /></td>
+        <td><input name="un" type="text"  id="un11" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel28"  >
+        <td>12
+        <input name="namechannel" id="namechannel12" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus12" type="text"  disabled  /></td>
+        <td><input  type="text" size="110" id='func12'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue12" disabled  /></td>
+        <td><input name="un" type="text"  id="un12" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel29"  >
+        <td>13
+        <input name="namechannel" id="namechannel13" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus13" type="text" disabled  /></td>
+        <td><input  type="text" size="110" id='func13'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue13" disabled  /></td>
+        <td><input name="un" type="text"  id="un13" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel30"  >
+        <td>14
+        <input name="namechannel" id="namechannel14" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus14" type="text" disabled  /></td>
+        <td><input  type="text" size="110" id='func14'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue14" disabled  /></td>
+        <td><input name="un" type="text"  id="un14" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel31"  >
+        <td>15
+        <input name="namechannel" id="namechannel15" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus15" type="text" disabled /></td>
+        <td><input  type="text" size="110" id='func15'   /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue15" disabled  /></td>
+        <td><input name="un" type="text"  id="un15" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel32"  >
+        <td>16
+        <input name="namechannel" id="namechannel16" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus16" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func16'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue16" disabled  /></td>
+        <td><input name="un" type="text"  id="un16" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr id="channel33"  >
+        <td>17
+        <input name="namechannel2" id="namechannel17" type="text" size="12" disabled  /></td>
+        <td><input name="readanalog" size="8"  id="readmodbus17" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func17'  /></td>
+        <td><input name="lo" type="text"   size="8"  id="realvalue17" disabled  /></td>
+        <td><input name="un" type="text"  id="un17" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr  >
+        <td>18
+        <input name="namechannel3" id="namechannel18" type="text" size="12" disabled  /></td>
+        <td><input name="address2" size="8"  id="readmodbus18" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func18'  /></td>
+        <td><input name="lo2" type="text"   size="8"  id="realvalue18" disabled  /></td>
+        <td><input name="un2" type="text"  id="un18" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr  >
+        <td>19
+        <input id="namechannel19" type="text" size="12" disabled  /></td>
+        <td><input size="8"  id="readmodbus19" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func19'  /></td>
+        <td><input name="lo3" type="text"   size="8"  id="realvalue19" disabled  /></td>
+        <td><input name="un3" type="text"  id="un19" size="3" maxlength="3" disabled  /></td>
+      </tr>
+      <tr  >
+        <td>20
+        <input name="namechannel5" id="namechannel20" type="text" size="12" disabled  /></td>
+        <td><input name="address4" size="8"  id="readmodbus20" type="text" disabled   /></td>
+        <td><input  type="text" size="110" id='func20'  /></td>
+        <td><input name="lo4" type="text"   size="8"  id="realvalue20" disabled  /></td>
+        <td><input name="un4" type="text"  id="un20" size="3" maxlength="3" disabled  /></td>
+      </tr>
+  </table>
+  <span id="result"></span>
+<p>
+  <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+  </p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2017 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V17</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

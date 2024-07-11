@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Smoke Alarm ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+	function callMacro_UpdateMonitor()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_generatorstatus",[], receiverdatas);
+		Flag=0;
+    }
+	//Nhan thong tin nhu module co ket noi hay khong ?, trang thai dang dong = 1 hay dang mo = 0
+	//connect1,inputsmoke1, connect2, inputsmoke2
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split(',');
+			if (rcd.length >= 1) 
+			{
+				//Module 1
+				connect1=	(rcd.length > 0)? rcd[0] : "";
+				input1= (rcd.length > 1)? rcd[1] : "";	
+				//------------------------------------
+				if(connect1==0)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Not connect";
+				else if(connect1==1)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Connecting";
+				else if(connect1==2 || connect1==3)
+					document.getElementById('connectmodule1').innerHTML="MOBULE1: Alarm";
+				//-----------------------------------------
+				var baochay1bin=Number(input1).toString(2);
+				var baochay1binstr=baochay1bin.split('');
+				for(j=0;j<5;j++)
+				{	
+					var bits=(baochay1binstr.length > (baochay1binstr.length-j-1))? baochay1binstr[baochay1binstr.length-j-1]: "";
+					if(bits=='1')
+					{
+						document.getElementById('colorclose1'+j).bgColor="red";	
+						document.getElementById('coloropen1'+j).bgColor="white";
+					}
+					else
+					{
+						document.getElementById('colorclose1'+j).bgColor="white";
+						document.getElementById('coloropen1'+j).bgColor="red";
+					}
+				}
+				
+				//Module 2
+				connect2=	(rcd.length > 2)? rcd[2] : "";
+				input2= (rcd.length > 3)? rcd[3] : "";	
+				//------------------------------------
+				if(connect2==0)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Not connect";
+				else if(connect2==1)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Connecting";
+				else if(connect2==2 || connect1==3)
+					document.getElementById('connectmodule2').innerHTML="MOBULE2: Alarm";	
+				//---------------------------------------
+				var baochay2bin=Number(input2).toString(2);
+				var baochay2binstr=baochay2bin.split('');
+				for(j=0;j<5;j++)
+				{	
+					var bits=(baochay2binstr.length > (baochay2binstr.length-j-1))? baochay2binstr[baochay2binstr.length-j-1]: "";
+					if(bits=='1')
+					{
+						document.getElementById('colorclose2'+j).bgColor="red";	
+						document.getElementById('coloropen2'+j).bgColor="white";
+					}
+					else
+					{
+						document.getElementById('colorclose2'+j).bgColor="white";
+						document.getElementById('coloropen2'+j).bgColor="red";
+					}
+				}	
+			}
+		}
+    }
+
+	//Nhan trang thai cua cac module
+	function callMacro_UpdateModule()
+    {
+       // Get data from macro
+	   	webiopi().callMacro("UpdateModuleGenerator", [], receiverUpdateModuleGenerator);
+	}
+	//Doc ban tin cac module
+	//close0,open0,close1,open1....
+	function receiverUpdateModuleGenerator(macro, args, response) 
+	{
+		if (response != null) 
+		{
+			var rcd = response.split(',');
+			if (rcd.length >= 1) 
+			{
+				for (var i = 0; i < 5; i++) 
+				{
+				
+					if(document.getElementById('close1'+i))
+						document.getElementById('close1'+i).innerHTML=(rcd.length > i*2)? rcd[i*2] : "";
+					if(document.getElementById('open1'+i))
+						document.getElementById('open1'+i).innerHTML=(rcd.length > i*2+1)? rcd[i*2+1] : "";
+					
+				}
+				for (var i = 0; i < 5; i++) 
+				{
+					if(document.getElementById('close2'+i))
+						document.getElementById('close2'+i).innerHTML=(rcd.length > i*2+10)? rcd[i*2+10] : "";
+					if(document.getElementById('open2'+i))
+						document.getElementById('open2'+i).innerHTML=(rcd.length > i*2+11)? rcd[i*2+11] : "";
+				}
+			}
+		}
+	}
+	
+</script>
+<body bgcolor="white" onload="callMacro_UpdateModule();">
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokemonitor.htm" style="text-decoration:none"><font size="4"><strong>Smoke Monitor</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="aircontrol.htm" style="text-decoration:none"><font size="4"><strong>Air Control</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="airconsetting.htm" style="text-decoration:none"><font size="4"><strong>Air Con Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="smokesetting.htm" style="text-decoration:none"><font size="4"><strong>Smoke Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>GENERATOR MONITOR (white: open, red: close)</b></font></td></tr>		
+</table>
+
+  <table width="100%" border="0">
+    <tr align="center">
+      <td bgcolor="#CCCCCC"><strong>INPUT</strong></td>
+      <td bgcolor="#CCCCCC"><strong>CLOSE MESSAGE</strong></td>
+      <td bgcolor="#CCCCCC"><strong>OPEN MESSAGE</strong></td>
+    </tr>
+      <tr align="center">
+        <td colspan="3"><strong><span id='connectmodule1'>MODULE 1</span></strong></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>1</strong></td>
+        <td id="colorclose10"><span id='close10'></span></td>
+        <td id="coloropen10"><span id='open10'></span></td>
+      </tr>
+      <tr align="center" id="channel11">
+        <td><strong>2</strong></td>
+        <td id="colorclose11"><span id='close11'></span></td>
+        <td id="coloropen11"><span id='open11'></span></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td><strong>3</strong></td>
+        <td id="colorclose12"><span id='close12'></span></td>
+        <td id="coloropen12"><span id='open12'></span></td>
+      </tr>
+      <tr align="center" id="channel13">
+        <td><strong>4</strong></td>
+        <td id="colorclose13"><span id='close13'></span></td>
+        <td id="coloropen13"><span id='open13'></span></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td><strong>5</strong></td>
+        <td id="colorclose14"><span id='close14'></span></td>
+        <td id="coloropen14"><span id='open14'></span></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong><span id='connectmodule2'>MODULE 2</span></strong></td>
+      </tr>
+      <tr align="center" id="channel20">
+        <td><strong>1</strong></td>
+        <td id="colorclose20"><span id='close20'></span></td>
+        <td id="coloropen20"><span id='open20'></span></td>
+      </tr>
+      <tr align="center" id="channel21">
+        <td><strong>2</strong></td>
+        <td id="colorclose21"><span id='close21'></span></td>
+        <td id="coloropen21"><span id='open21'></span></td>
+      </tr>
+      <tr align="center" id="channel22">
+        <td><strong>3</strong></td>
+        <td id="colorclose22"><span id='close22'></span></td>
+        <td id="coloropen22"><span id='open22'></span></td>
+      </tr>
+      <tr align="center" id="channel23">
+        <td><strong>4</strong></td>
+        <td id="colorclose23"><span id='close23'></span></td>
+        <td id="coloropen23"><span id='open23'></span></td>
+      </tr>
+      <tr align="center" id="channel24">
+        <td><strong>5</strong></td>
+        <td id="colorclose24"><span id='close24'></span></td>
+        <td id="coloropen24"><span id='open24'></span></td>
+      </tr>
+    </table>
+  <p>&nbsp;</p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2016 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-BTS916</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

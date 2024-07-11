@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Trend ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script src="Highcharts-4.0.4/js/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script language="JavaScript">
+	var maxvalues=0;
+	var minvalues=0;
+	var entryvalues=0;
+	var times=[];
+	var values=[];
+	var unitchannel="";
+	var namechannel="";
+	webiopi().ready(function() 
+	{	
+	});
+	//Thuc hien onload
+	function receiverdatas(macro, args, response) 
+	{
+		if(response.length>0)
+		{
+			var latest = JSON.parse(response);
+				//alert(latest.name);
+				unitchannel=latest.units;
+				values=latest.datas;
+				namechannel=latest.datas.name;
+				var data_aray=[];
+				for(i=0;i<values.data.length;i++)
+				{
+					data_aray[i]=values.data[i][1];
+				}
+				//alert(data_aray);
+				maxvalues=Math.max.apply(null,data_aray);
+				minvalues=Math.min.apply(null,data_aray);
+				entryvalues=values.data.length;
+			ChartDisplay();
+		}
+    }
+	//Liet ke su kien lien quan ngay va kenh
+	function ListChannelDays()
+	{
+		var myParam = location.search.split('channel=')[1];
+		if(myParam===undefined)
+			var index = [$("#channel").val(),$("#days").val()];
+		else
+		{
+			document.getElementById('channel').value=myParam;
+         	var index = [myParam,$("#days").val()];
+		}
+        // Call the macro
+        webiopi().callMacro("load_history_days_channel", index, receiverdatas);
+	}
+	function LoadData()
+	{
+		if(document.getElementById('startdate').value||document.getElementById('enddate').value)
+			ListChannelDate();
+		else
+			ListChannelDays();
+	}
+	//setInterval(LoadData,20000);
+		//Liet ke su kien lien quan ngay va kenh
+	function ListChannelDate()
+	{
+		 // Arguments sent to the macro
+         var index = [$("#channel").val(),$("#startdate").val(),$("#enddate").val()];
+         // Call the macro
+         webiopi().callMacro("load_history_date_channel", index, receiverdatas);
+	}
+	//Macro liet ke ten du lieu
+	function listnamechannel()
+	{
+		webiopi().callMacro("Listnamechannel",[], receivernamechannel);
+		LoadData();
+		
+	}
+	//Liet ke ten cua cac kenh du lieu
+	function receivernamechannel(macro, args, response) 
+	{
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{	
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					var data='idchannel'+i;
+					var idchannel = (rcd.length > i)? rcd[i] : "";
+					if(document.getElementById(data))
+						document.getElementById(data).innerHTML=idchannel;
+					
+				}
+			}
+		}
+	}
+</script>
+<script language="JavaScript">
+function ChartDisplay() {
+
+	//$(document).ready(function(){
+ 	//$("#displaychart").click(function(){
+	//alert(document.getElementById('datatable').innerHTML);
+	var chart = new Highcharts.Chart({
+	    chart: {
+			renderTo: 'container',
+            type: 'line',
+			zoomType: 'x'
+        },
+        title: {
+            text: '<b>'+namechannel+'</b>: Max:<b>'+ maxvalues+unitchannel+'</b> Min:<b>'+ minvalues+unitchannel+' </b>Entries:<b>'+entryvalues+'</b>'
+        },
+		plotOptions: {
+        line: {
+            enableMouseTracking: true
+        		}
+    	},
+		xAxis: {
+	        type: 'datetime',
+            dateTimeLabelFormats: { // don't display the dummy year
+              second: '%Y-%m-%d<br/>%H:%M:%S',
+              minute: '%Y-%m-%d<br/>%H:%M',
+              hour: '%Y-%m-%d<br/>%H:%M',
+              day: '%Y<br/>%m-%d',
+              week: '%Y<br/>%m-%d',
+              month: '%Y-%m',
+              year: '%Y'
+            },
+            title: {
+                text: 'Date'
+            }
+        },
+		yAxis: {
+            title: {
+                text: unitchannel
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+             }]
+        },
+        tooltip: {
+        headerFormat: '<b>{series.name}</b><br>',
+        pointFormat: '{point.x:%H:%M}: {point.y:.2f}'
+        },
+        series: [values]
+		
+    });
+}
+</script>
+<script src="Highcharts-4.0.4/js/highcharts.js"></script>
+<script src="Highcharts-4.0.4/js/modules/data.js"></script>
+<script src="Highcharts-4.0.4/js/modules/exporting.js"></script>
+<body bgcolor="white" onload="listnamechannel()" >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmscheduler.htm" style="text-decoration:none"><font size="4"><strong>Scheduler Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<table width="100%" border="1">
+  <tr bgcolor="#0000CC" bordercolor="#ECE9D8">
+      <th><font color="#FFFF00"><strong>Channel</strong></font></th>
+      <th><font color="#FFFF00"><strong>Days</strong></font></th>
+      <th><strong><font color="#FFFF00">Start Date - End Date (YYYY-MM-DD)</font></strong></th>
+      </tr>
+    <tr align="center">
+      <th scope="row">
+      <select name="channel" id="channel">
+      <option value="0" id="idchannel0"></option>
+      <option value="1" id="idchannel1"></option>
+      <option value="2" id="idchannel2"></option>
+      <option value="3" id="idchannel3"></option>
+      <option value="4" id="idchannel4"></option>
+      <option value="5" id="idchannel5"></option>
+      <option value="6" id="idchannel6"></option>
+      <option value="7" id="idchannel7"></option>
+      <option value="8" id="idchannel8"></option>
+      <option value="9" id="idchannel9"></option>
+      <option value="10" id="idchannel10"></option>
+      <option value="11" id="idchannel11"></option>
+      <option value="12" id="idchannel12"></option>
+      <option value="13" id="idchannel13"></option>
+      <option value="14" id="idchannel14"></option>
+      <option value="15" id="idchannel15"></option>
+      <option value="16" id="idchannel16"></option>
+      <option value="17" id="idchannel17"></option>
+      <option value="18" id="idchannel18"></option>
+      <option value="19" id="idchannel19"></option>
+      <option value="20" id="idchannel20"></option>
+      <option value="21" id="idchannel21"></option>
+      <option value="22" id="idchannel22"></option>
+      <option value="23" id="idchannel23"></option>
+  		</select>
+  	</th>
+  
+      <td>
+        <input name="hour" type="number" id="days" value="1" maxlength="1" />
+     </td>
+       <td>
+         <input name="startdate" type="date" id="startdate" />
+         <input name="enddate" type="date" id="enddate" />
+         <input name="Button" type="button" onclick="LoadData()" value="Load Data" />
+       </td>
+      </tr>
+  </table>
+
+<!--<div id="VariableTable" style="text-align: center; "></div>-->
+      <!--<span id="txtAutoUpdateStatus">Loading...</span>-->
+<table width="100%" border="0">
+  <tr>
+    <td width="100%"><div id="container" style="width: 100%; height: 700px;"></div></td>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-V18</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

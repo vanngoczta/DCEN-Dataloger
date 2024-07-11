@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Data ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Liststation="";
+webiopi().ready(function() 
+{	
+	// Following function will process data received from set/getLightHours macro.
+    var receiverdata = function(macro, args, response) 
+	{
+            var data = response.split(",");
+			//alert (data);
+            // Following lines use jQuery functions
+			var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response, dataTable);
+			resizeTable();
+    }
+});
+	function receiverdatas(macro, args, response) 
+	{
+			
+			var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response, dataTable);
+			resizeTable();
+    }
+	//Liet ke su kien lien quan den gio
+	function ListChannelDays()
+	{
+		 // Arguments sent to the macro
+         var index = [$("#address").val(),$("#days").val()];
+         // Call the macro
+         webiopi().callMacro("load_history_data_day", index, receiverdatas);
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function ListChannelDate()
+	{
+		// Arguments sent to the macro, id channel
+        var Channel = [$("#address").val(),$("#startdate").val(),$("#enddate").val()];
+        // Call the macro
+        webiopi().callMacro("load_history_data_date", Channel, receiverdatas);
+	}
+
+//------------------------------------------------------------
+    // convenience: wrap value in specified font
+    function setFont(val, face, size) {
+        var s = "<font";
+        s += " face='" + face + "'";
+        s += "size=" + size;
+        s += ">";
+        s += val;
+        s += "</font>";
+        return s;
+    }
+    
+    // convenience: set header font
+    function hdrFont(val) {
+       return "<center><b>" + setFont(val, "arial", 2) + "</b></center>";
+    }
+    
+    // convenience: set data font
+    function dtaFont(val) {
+       return "<center>" + val + "</center>";
+    }
+		function getWindowHeight() {
+        var winHeight = 0;
+        if (typeof(window.innerWidth) == 'number') {
+            // Non-IE
+            winHeight = window.innerHeight; // innerWidth
+        } else 
+        if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+            // IE 6+ in 'standards compliant mode'
+            winHeight = document.documentElement.clientHeight; // clientWidth
+        } else 
+        if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+            //IE 4 compatible
+            winHeight = document.body.clientHeight; // clientWidth
+        }
+        //window.alert( 'Height = ' + winHeight);
+        return winHeight;
+    }
+	// return the absolute Y offset of an object (relative to page
+    function getAbsoluteOffsetTop(obj) {
+        var absTop = 0;
+        if (obj.offsetParent) {
+            for (; obj.offsetParent; obj = obj.offsetParent) {
+                absTop += obj.offsetTop;
+            }
+        } else
+        if (obj.y) {
+            absTop += obj.y;
+        }
+        return absTop;
+    }
+	 // on resize
+    function resizeTable() {
+        var dataTableDiv = document.getElementById('data_table_div');
+        var last_hr      = document.getElementById('last_hr');
+        var winHeight    = getWindowHeight();
+        var dataHeight   = (winHeight - last_hr.clientHeight) - getAbsoluteOffsetTop(dataTableDiv) - 25;
+        //alert("Table height: [" + getAbsoluteOffsetTop(dataTableDiv) + "] " + dataHeight);
+        if (dataHeight > 25) {
+            dataTableDiv.style.height = dataHeight + "px";
+        } else {
+            dataTableDiv.style.height = "auto";
+        }
+    }
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function populateDataTable(text, dataTable)
+{	// the following limits the number of 'pushPins' placed on the map to the last MAX_PUSH_PINS points.
+	var indexst=0;
+	var MAX_PUSH_PINS = 40; // arbitrary limit
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			var ndx = 0;
+			var tableData = "";
+	// ID |date | time | channel | namechannel | value | unit | status | 
+			tableData += "<table id='data_table' width='100%' cellspacing='0' cellpadding='0' border='1'>\n";
+			tableData += "<thead><tr bgcolor=\"#FFFF00\">";
+			tableData += "<td>" + hdrFont("ID","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Date","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Time","verdana","4") + "</td>";
+			tableData += "<td>"  + hdrFont("Channel","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Name","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Value","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Unit","verdana","4") + "</td>";
+			tableData += "<td>" + hdrFont("Status","verdana","4") + "</td>";
+            tableData += "</tr></thead>\n";
+			tableData += "<tbody id='data_tbody'>\n";
+			var startNdx = rcd.length - MAX_PUSH_PINS - 1; // '- 1' because the last 'rcd' is blank
+			//alert(rcd);
+			if (startNdx < 0) 
+			{ startNdx = 0; }
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+					// ID |date | time | channel | namechannel | value | unit | status | 
+						var id			= 	(fld.length > 0)? fld[0] : "";
+						var date		= 	(fld.length > 1)? fld[1] : "";
+						var time  		= 	(fld.length > 2)? fld[2] : "";
+						var channel 		= 	(fld.length > 3)? fld[3] : "";
+						var name		= 	(fld.length > 4)? fld[4] : "";
+						var value 		= 	(fld.length > 5)? fld[5] : "";
+						var units 		= 	(fld.length > 6)? fld[6] : "";
+						var status 		= 	(fld.length > 7)? fld[7] : "";
+						var strstatus="";
+						if(status==0)
+							strstatus="Not connect";
+						else if(status==1)
+							strstatus="Connected";
+						else if(status==2)
+							strstatus="Low Alarm";
+						else if(status==3)
+							strstatus="High Alarm";
+						tableData += "<tr>";
+						tableData += "<td>" + dtaFont(id) + "</td>";
+						tableData += "<td>"  + dtaFont(date) + "</td>";
+						tableData += "<td>" + dtaFont(time) + "</td>";
+						tableData += "<td>" + dtaFont(channel) + "</td>";
+						tableData += "<td>" + dtaFont(name) + "</td>";			
+						tableData += "<td>" + dtaFont(value) + "</td>";
+						tableData += "<td>" + dtaFont(units) + "</td>";	
+						tableData += "<td>" + dtaFont(strstatus) + "</td>";
+						tableData += "</tr>\n";
+							
+					}
+				}
+			}
+			tableData += "</tbody>\n";
+			tableData += "</table>\n";
+			dataTable.innerHTML = tableData;
+			
+		}
+		else 
+			{
+              	dataTable.innerHTML = "(No data) " + text;
+          	}
+	}
+	else 
+	  		{
+          		dataTable.innerHTML = "Null data";
+       		}
+	//alert(Liststation);
+	return true;
+}
+//---------------------Get Excel--------------------------------------
+function tabletoExcel(table, name) {
+    var uri = 'data:application/vnd.ms-excel;base64,'
+          , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+          , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))); }
+          , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }); };
+        if (!table.nodeType) table = document.getElementById(table);
+        var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+        window.location.href = uri + base64(format(template, ctx));
+
+}
+</script>
+
+<body bgcolor="white" onload="ListChannelDays()" >
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div>
+<a href="JavaScript:window.print()"><img src="print.gif" border="0" /></a> <img src="download_icon.gif" onClick="tabletoExcel('data_table_div','Datalog')" border="0" />
+</div>
+<table width="101%" border="2">
+  <tr>
+    <td bordercolor="#ECE9D8" bgcolor="#996600"><font color="#FFFFFF"><strong>Days To Include In Feed (1 - 9)</strong></font></td>
+    <td><div align="left">
+      <p>
+        <input name="hour" type="number" id="days" value="1" maxlength="1" />
+        <input name="Button" type="button" onclick="ListChannelDays()" value="Load Data" />
+        </p>
+    </div></td>
+    <th bordercolor="#ECE9D8" bgcolor="#996600"><font color="#FFFFFF"><strong>Page Select  </strong></font></th>
+  </tr>
+  <tr>
+    <td bordercolor="#ECE9D8" bgcolor="#996600"><strong><font color="#FFFFFF">Start Date - End Date (YYYY-MM-DD) </font></strong></td>
+    <td><div align="left">
+      <p>
+        <input name="startdate" type="date" id="startdate" />
+        <input name="enddate" type="date" id="enddate" />
+        <input name="Button" type="button" onclick="ListChannelDate()" value="Load Data" id="button2" />
+        </p>
+    </div></td>
+    <th align="center" scope="row"><select name="address"  id="address">
+      <option value="0">1</option>
+      <option value="1">2</option>
+      <option value="2">3</option>
+      <option value="3">4</option>
+
+    </select></th>
+  </tr>
+</table>
+<p><hr id='last_hr'></p>
+<p></p>
+    <div id='data_table_div' style="overflow-x: hidden;"></div>
+	<p></p>
+	  
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+<tr>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2014 DCEN.VN</font></strong></font></div></a></td>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-V514</font></strong></font></div></td>
+</tr>
+</table>
+</body>
+</html>

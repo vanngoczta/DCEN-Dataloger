@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting Input 485 ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+        // Call the macro
+    	webiopi().callMacro("load_smokesetting",[], receiverdatas);
+		Flag=0;
+    }
+	//address1,address2,timeoutput3, mesalarm, mesnormal,name10,mode10,name11,mode11...
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('add1').value =		(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('add2').value =		(rcd.length > 1)? rcd[1] : "";
+				document.getElementById('add3').value =		(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('add4').value =		(rcd.length > 3)? rcd[3] : "";
+				document.getElementById('timeout3').value =		(rcd.length > 4)? rcd[4] : "";
+				document.getElementById('alarm').value =		(rcd.length > 5)? rcd[5] : "";		
+				for(var i=1;i<11;i++)
+				{
+					document.getElementById('open1'+i).value= (rcd.length > i*2+6)? rcd[i*2+6] : "";
+					document.getElementById('close1'+i).value = 	(rcd.length > i*2+7)? rcd[i*2+7] : "";	
+					document.getElementById('open2'+i).value= (rcd.length > i*2+26)? rcd[i*2+26] : "";
+					document.getElementById('close2'+i).value = 	(rcd.length > i*2+27)? rcd[i*2+27] : "";	
+					document.getElementById('open3'+i).value= (rcd.length > i*2+46)? rcd[i*2+46] : "";
+					document.getElementById('close3'+i).value = 	(rcd.length > i*2+47)? rcd[i*2+47] : "";	
+					document.getElementById('open4'+i).value= (rcd.length > i*2+66)? rcd[i*2+66] : "";
+					document.getElementById('close4'+i).value = 	(rcd.length > i*2+67)? rcd[i*2+67] : "";
+					
+				}
+				
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+					
+			}
+		}
+    }
+	//Load cac du lieu cai dat
+	function Loadsetting()
+	{
+		// Call the macro
+        webiopi().callMacro("load_input485setting",[], receiverdatas);
+		document.getElementById('result').innerHTML="Loaded Setting";
+		Flag=0;
+		
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('add1').value+';';
+		stringval=stringval+document.getElementById('add2').value+';';
+		stringval=stringval+document.getElementById('add3').value+';';
+		stringval=stringval+document.getElementById('add4').value+';';
+		stringval=stringval+document.getElementById('timeout3').value+';';
+		stringval=stringval+document.getElementById('alarm').value+';';
+		for(var i=1;i<11;i++)
+		{
+			stringval=stringval+document.getElementById('open1'+i).value+';';
+			stringval=stringval+document.getElementById('close1'+i).value+';';
+		}
+		for(var i=1;i<11;i++)
+		{
+			stringval=stringval+document.getElementById('open2'+i).value+';';
+			stringval=stringval+document.getElementById('close2'+i).value+';';
+		}
+		for(var i=1;i<11;i++)
+		{
+			stringval=stringval+document.getElementById('open3'+i).value+';';
+			stringval=stringval+document.getElementById('close3'+i).value+';';
+		}
+		for(var i=1;i<11;i++)
+		{
+			stringval=stringval+document.getElementById('open4'+i).value+';';
+			stringval=stringval+document.getElementById('close4'+i).value+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_input485setting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();">
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>ECA-10IN485 SETTING </b></font></td></tr>		
+</table>
+
+    <table width="100%" border="0">
+      <tr align="center">
+        <td bgcolor="#CCCCCC"><strong>INPUT</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Message Open</strong></td>
+        <td bgcolor="#CCCCCC"><strong>Message Close</strong></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>1 Address Slave Modbus
+            <input name="add1" type="number" id="add1" maxlength="2" min="1" />
+        </strong></td>
+      </tr>
+      <tr align="center" id="channel0">
+        <td><strong>1</strong></td>
+        <td><input name="open11" id="open11" type="text" maxlength="18" /></td>
+        <td><input name="close11" id="close11" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel1">
+        <td><strong>2</strong></td>
+        <td><input name="open12" id="open12" type="text" maxlength="18" /></td>
+        <td><input name="close12" id="close12" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel2">
+        <td><strong>3</strong></td>
+        <td><input name="open13" id="open13" type="text" maxlength="18" /></td>
+        <td><input name="close13" id="close13" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel3">
+        <td><strong>4</strong></td>
+        <td><input name="open14" id="open14" type="text" maxlength="18" /></td>
+        <td><input name="close14" id="close14" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel4">
+        <td><strong>5</strong></td>
+        <td><input name="open15" id="open15" type="text" maxlength="18" /></td>
+        <td><input name="close15" id="close15" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel5">
+        <td><strong>6</strong></td>
+        <td><input name="open16" id="open16" type="text" maxlength="18" /></td>
+        <td><input name="close16" id="close16" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel6">
+        <td><strong>7</strong></td>
+        <td><input name="open17" id="open17" type="text" maxlength="18" /></td>
+        <td><input name="close17" id="close17" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel7">
+        <td><strong>8</strong></td>
+        <td><input name="open18" id="open18" type="text" maxlength="18" /></td>
+        <td><input name="close18" id="close18" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel8">
+        <td><strong>9</strong></td>
+        <td><input name="open19" id="open19" type="text" maxlength="18" /></td>
+        <td><input name="close19" id="close19" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel9">
+        <td><strong>10</strong></td>
+        <td><input name="open110" id="open110" type="text" maxlength="18" /></td>
+        <td><input name="close110" id="close110" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>2 Address Slave Modbus
+            <input name="add2" type="number" id="add2" maxlength="2" min="1" />
+        </strong></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>1</strong></td>
+        <td><input name="open21" id="open21" type="text" maxlength="18" /></td>
+        <td><input name="close21" id="close21" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel11">
+        <td><strong>2</strong></td>
+        <td><input name="open22" id="open22" type="text" maxlength="18" /></td>
+        <td><input name="close22" id="close22" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td><strong>3</strong></td>
+        <td><input name="open23" id="open23" type="text" maxlength="18" /></td>
+        <td><input name="close23" id="close23" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel13">
+        <td><strong>4</strong></td>
+        <td><input name="open24" id="open24" type="text" maxlength="18" /></td>
+        <td><input name="close24" id="close24" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td><strong>5</strong></td>
+        <td><input name="open25" id="open25" type="text" maxlength="18" /></td>
+        <td><input name="close25" id="close25" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel15">
+        <td><strong>6</strong></td>
+        <td><input name="open26" id="open26" type="text" maxlength="18" /></td>
+        <td><input name="close26" id="close26" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel16">
+        <td><strong>7</strong></td>
+        <td><input name="open27" id="open27" type="text" maxlength="18" /></td>
+        <td><input name="close27" id="close27" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel17">
+        <td><strong>8</strong></td>
+        <td><input name="open28" id="open28" type="text" maxlength="18" /></td>
+        <td><input name="close28" id="close28" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel10">
+        <td><strong>9</strong></td>
+        <td><input name="open29" id="open29" type="text" maxlength="18" /></td>
+        <td><input name="close29" id="close29" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel19">
+        <td><strong>10</strong></td>
+        <td><input name="open210" id="open210" type="text" maxlength="18" /></td>
+        <td><input name="close210" id="close210" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong> 3 Address Slave Modbus
+            <input name="add3" type="number" id="add3" maxlength="2" min="1" />
+        </strong></td>
+      </tr>
+      <tr align="center" id="channel18">
+        <td><strong>1</strong></td>
+        <td><input name="open31" id="open31" type="text" maxlength="18" /></td>
+        <td><input name="close31" id="close31" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel20">
+        <td><strong>2</strong></td>
+        <td><input name="open32" id="open32" type="text" maxlength="18" /></td>
+        <td><input name="close32" id="close32" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel21">
+        <td><strong>3</strong></td>
+        <td><input name="open33" id="open33" type="text" maxlength="18" /></td>
+        <td><input name="close33" id="close33" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel22">
+        <td><strong>4</strong></td>
+        <td><input name="open34" id="open34" type="text" maxlength="18" /></td>
+        <td><input name="close34" id="close34" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel23">
+        <td><strong>5</strong></td>
+        <td><input name="open35" id="open35" type="text" maxlength="18" /></td>
+        <td><input name="close35" id="close35" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel24">
+        <td><strong>6</strong></td>
+        <td><input name="open36" id="open36" type="text" maxlength="18" /></td>
+        <td><input name="close36" id="close36" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel25">
+        <td><strong>7</strong></td>
+        <td><input name="open37" id="open37" type="text" maxlength="18" /></td>
+        <td><input name="close37" id="close37" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel26">
+        <td><strong>8</strong></td>
+        <td><input name="open38" id="open38" type="text" maxlength="18" /></td>
+        <td><input name="close38" id="close38" type="text" maxlength="18" /></td>
+      </tr>
+      <tr  align="center" id="channel27">
+        <td><strong>9</strong></td>
+        <td><input name="open39" id="open39" type="text" maxlength="18" /></td>
+        <td><input name="close39" id="close39" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel28">
+        <td><strong>10</strong></td>
+        <td><input name="open310" id="open310" type="text" maxlength="18" /></td>
+        <td><input name="close310" id="close310" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center">
+        <td colspan="3"><strong>4 Address Slave Modbus
+            <input name="add4" type="number" id="add4" maxlength="2" min="1" />
+        </strong></td>
+      </tr>
+      <tr align="center" id="channel29">
+        <td><strong>1</strong></td>
+        <td><input name="open41" id="open41" type="text" maxlength="18" /></td>
+        <td><input name="close41" id="close41" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel30">
+        <td><strong>2</strong></td>
+        <td><input name="open42" id="open42" type="text" maxlength="18" /></td>
+        <td><input name="close42" id="close42" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel31">
+        <td><strong>3</strong></td>
+        <td><input name="open43" id="open43" type="text" maxlength="18" /></td>
+        <td><input name="close43" id="close43" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel32">
+        <td><strong>4</strong></td>
+        <td><input name="open44" id="open44" type="text" maxlength="18" /></td>
+        <td><input name="close44" id="close44" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel33">
+        <td><strong>5</strong></td>
+        <td><input name="open45" id="open45" type="text" maxlength="18" /></td>
+        <td><input name="close45" id="close45" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel34">
+        <td><strong>6</strong></td>
+        <td><input name="open46" id="open46" type="text" maxlength="18" /></td>
+        <td><input name="close46" id="close46" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel35">
+        <td><strong>7</strong></td>
+        <td><input name="open47" id="open47" type="text" maxlength="18" /></td>
+        <td><input name="close47" id="close47" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel36">
+        <td><strong>8</strong></td>
+        <td><input name="open48" id="open48" type="text" maxlength="18" /></td>
+        <td><input name="close48" id="close48" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel29">
+        <td><strong>9</strong></td>
+        <td><input name="open49" id="open49" type="text" maxlength="18" /></td>
+        <td><input name="close49" id="close49" type="text" maxlength="18" /></td>
+      </tr>
+      <tr align="center" id="channel37">
+        <td><strong>10</strong></td>
+        <td><input name="open410" id="open410" type="text" maxlength="18" /></td>
+        <td><input name="close410" id="close410" type="text" maxlength="18" /></td>
+      </tr>
+  </table>
+  <p>
+    <label><strong>    Common Setting :</strong></label>
+  </p>
+  <table width="100%" border="1">
+    <tr align="center">
+      <td width="28%" bgcolor="#CCCCCC"><strong>Time Output3 Siren (sec)</strong></td>
+      <td width="24%" bgcolor="#CCCCCC"><strong>Alarm Mode</strong></td>
+    </tr>
+    <tr align="center">
+      <td><input name="tout3" id="timeout3" type="text" /></td>
+      <td><select name="alarm"  id="alarm">
+        <option value="0" >Disable Alarm</option>
+        <option value="1" >Enable Alarm</option>
+      </select></td>
+    </tr>
+  </table>
+  <p><span id="result"></span></p>
+    <p>
+      <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+	</p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-1018</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

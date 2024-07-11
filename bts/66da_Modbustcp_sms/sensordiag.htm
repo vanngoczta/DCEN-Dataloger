@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>SENSOR DIAGNOSTIC ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_scansensor",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				for(var i=0;i<21;i++)
+				{
+					document.getElementById('namechannel'+i).value= (rcd.length > i*8+0)? rcd[i*8+0] : "";
+					document.getElementById('address'+i).value = 	(rcd.length > i*8+1)? rcd[i*8+1] : "";
+					document.getElementById('fc'+i).value = 		(rcd.length > i*8+2)? rcd[i*8+2] : "";
+					document.getElementById('start'+i).value = 	 (rcd.length > i*8+3)? rcd[i*8+3] : "";
+					document.getElementById('number'+i).value = 	(rcd.length > i*8+4)? rcd[i*8+4] : "";
+					document.getElementById('datatype'+i).value =  (rcd.length > i*8+5)? rcd[i*8+5] : "";
+					document.getElementById('read'+i).value = 	  (rcd.length > i*8+6)? rcd[i*8+6] : "";
+					document.getElementById('write'+i).value = 	  (rcd.length > i*8+7)? rcd[i*8+7] : "";
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Scanning...";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Scan()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<21;i++)
+		{
+			if(document.getElementById('namechannel'+i).value)
+				stringval=stringval+document.getElementById('namechannel'+i).value+';';
+			else
+				return;
+			if(document.getElementById('address'+i).value)
+				stringval=stringval+document.getElementById('address'+i).value+';';
+			else
+				return;
+			stringval=stringval+document.getElementById('fc'+i).value+';';
+			stringval=stringval+document.getElementById('start'+i).value+';';
+			stringval=stringval+document.getElementById('number'+i).value+';';
+			stringval=stringval+document.getElementById('datatype'+i).value+';';
+			stringval=stringval+document.getElementById('read'+i).value+';';
+			stringval=stringval+document.getElementById('write'+i).value+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("run_scansensor",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Scanning...";
+		setTimeout(callMacro_Listevents,5000);
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666" width="50%"><font color="#FFFFFF"><b>SENSOR DIAGNOSTIC</b></font></td>
+      <td bgcolor="#666666" width="50%" align="center"><a href="calibrationsetting.htm" style="text-decoration:none"><font size="4" color="#FFFFFF"><strong><u>Calibration Setting</u></strong></font></a></td>
+      </tr>		
+</table>
+<span id="result"></span>	
+	<p>
+      <input name="Button" type="button" onclick="Scan()" value="Scan Devices" />
+</p>
+<table  border="0" width="100%" align="center">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Sensor Name</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Address Slave </strong></td>
+    <td   bgcolor="#CCCCCC"><strong>Function code </strong></td>
+    <td   bgcolor="#CCCCCC"><strong>Address Reg</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+    <td    bgcolor="#CCCCCC"><strong>Data type</strong></td>
+    <td   bgcolor="#CCCCCC"><strong>Read</strong></td>
+    <td  bgcolor="#CCCCCC"><strong>Write</strong></td>
+    </tr>
+  <tr align="center">
+    <td><input  id="namechannel0" type="text" /></td>
+    <td><input  id="address0" type="text"  size="2"></td>
+    <td><select name="fc0" id="fc0">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      
+      </select></td>
+    <td><input  type="text" id='start0' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number0' maxlength="5" size="3"/></td>
+    <td><select name="datatype0" id="datatype0">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"   id="read0"  disabled /></td>
+    <td><input type="text" size="10"  id="write0"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel1" type="text" /></td>
+    <td><input id="address1" type="text"  size="2" /></td>
+    <td><select name="fc1" id="fc1">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start1' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number1' maxlength="5" size="3" /></td>
+    <td><select name="datatype1" id="datatype1">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read1" disabled  /></td>
+    <td><input type="text" size="10"  id="write1"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel2" type="text" /></td>
+    <td><input id="address2" type="text"  size="2"/></td>
+    <td><select name="fc" id="fc2">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start2' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number2' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype2">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read2"  disabled /></td>
+    <td><input type="text" size="10"  id="write2"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel3" type="text" /></td>
+    <td><input  id="address3" type="text"  size="2" /></td>
+    <td><select name="fc" id="fc3">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+    </select></td>
+    <td><input  type="text" id='start3' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number3' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype3">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+    </select></td>
+    <td><input type="text" size="10"  id="read3" disabled  /></td>
+    <td><input type="text" size="10"  id="write3"   /></td>
+    </tr>
+  <tr  align="center" >
+    <td><input name="namechannel" id="namechannel4" type="text" /></td>
+    <td><input  id="address4" type="text"  size="2" /></td>
+    <td><select name="fc" id="fc4">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start4' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number4' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype4">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read4" disabled  /></td>
+    <td><input type="text" size="10"  id="write4"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel5" type="text" /></td>
+    <td><input  id="address5" type="text"  size="2"/></td>
+    <td><select name="fc" id="fc5">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start5' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number5' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype5">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read5"  disabled /></td>
+    <td><input type="text" size="10"  id="write5"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel6" type="text" /></td>
+    <td><input  id="address6" type="text"  size="2"/></td>
+    <td><select name="fc" id="fc6">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start6' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number6' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype6">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read6" disabled  /></td>
+    <td><input type="text" size="10"  id="write6"   /></td>
+    </tr>
+  <tr align="center">
+    <td><input name="namechannel" id="namechannel7" type="text" /></td>
+    <td><input  id="address7" type="text"  size="2" /></td>
+    <td><select name="fc" id="fc7">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start7' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number7' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype7">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read7" disabled  /></td>
+    <td><input type="text" size="10"  id="write7"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel8" type="text" /></td>
+    <td><input  id="address8" type="text"  size="2"/></td>
+    <td><select name="fc" id="fc8">
+      <option value="2">2 RO discrete inputs</option>
+      <option value="3">3 RO Holding Reg</option>
+      <option value="4">4 RO Input Reg</option>
+      <option value="16">16 WR multiple reg</option>
+      </select></td>
+    <td><input  type="text" id='start8' maxlength="5" size="3"/></td>
+    <td><input  type="text" id='number8' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype8">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits = 2 reg)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text" size="10"  id="read8"  disabled /></td>
+    <td><input type="text" size="10"  id="write8"   /></td>
+    </tr>
+    <tr align="center" >
+      <td><input name="namechannel" id="namechannel9" type="text" /></td>
+      <td><input  id="address9" type="text"  size="2" /></td>
+      <td><select name="fc" id="fc9">
+        <option value="2">2 RO discrete inputs</option>
+        <option value="3">3 RO Holding Reg</option>
+        <option value="4">4 RO Input Reg</option>
+        <option value="16">16 WR multiple reg</option>
+        </select></td>
+      <td><input  type="text" id='start9' maxlength="5" size="3"/></td>
+      <td><input  type="text" id='number9' maxlength="5" size="3" /></td>
+      <td><select name="datatype" id="datatype9">
+        <option value="0" >Bit</option>
+        <option value="1" >Register Integer</option>
+        <option value="2" >Long (32 bits = 2 reg)</option>
+        <option value="3" >Float (32 or 64 bits)</option>
+        <option value="4" >String</option>
+        <option value="5" >Registers Integers</option>
+        </select></td>
+      <td><input type="text" size="10"  id="read9" disabled  /></td>
+      <td><input type="text" size="10"  id="write9"   /></td>
+    </tr>
+      <tr align="center" >
+        <td><input name="namechannel" id="namechannel10" type="text" /></td>
+        <td><input  id="address10" type="text"  size="2" /></td>
+        <td><select name="fc" id="fc10">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start10' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number10' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype10">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read10" disabled  /></td>
+        <td><input type="text" size="10"  id="write10"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel" id="namechannel11" type="text" /></td>
+        <td><input  id="address11" type="text"  size="2" /></td>
+        <td><select name="fc" id="fc11">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start11' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number11' maxlength="5" size="3" /></td>
+        <td><select name="datatype" id="datatype11">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read11"  disabled /></td>
+        <td><input type="text" size="10"  id="write11"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel" id="namechannel12" type="text" /></td>
+        <td><input  id="address12" type="text"  size="2" /></td>
+        <td><select name="fc" id="fc12">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start12' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number12' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype12">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read12" disabled  /></td>
+        <td><input type="text" size="10"  id="write12"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel" id="namechannel13" type="text" /></td>
+        <td><input  id="address13" type="text"  size="2"/></td>
+        <td><select name="fc" id="fc13">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="5">5 Force Single Coil</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start13' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number13' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype13">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read13" disabled  /></td>
+        <td><input type="text" size="10"  id="write13"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel" id="namechannel14" type="text" /></td>
+        <td><input  id="address14" type="text"  size="2"/></td>
+        <td><select name="fc" id="fc14">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start14' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number14' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype14">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read14"  disabled /></td>
+        <td><input type="text" size="10"  id="write14"   /></td>
+      </tr>
+      <tr  align="center">
+        <td><input name="namechannel" id="namechannel15" type="text" /></td>
+        <td><input  id="address15" type="text"  maxlength="2"size="2" /></td>
+        <td><select name="fc" id="fc15">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start15' maxlength="5" size="3" /></td>
+        <td><input  type="text" id='number15' maxlength="5" size="3" /></td>
+        <td><select name="datatype" id="datatype15">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read15" disabled  /></td>
+        <td><input type="text" size="10"  id="write15"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel" id="namechannel16" type="text" /></td>
+        <td><input  id="address16" type="text"  size="2" /></td>
+        <td><select name="fc" id="fc16">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start16' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number16' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype16">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read16" disabled  /></td>
+        <td><input type="text" size="10"  id="write16"   /></td>
+      </tr>
+      <tr align="center">
+        <td><input name="namechannel2" id="namechannel17" type="text" /></td>
+        <td><input  id="address17" type="text"  size="2" /></td>
+        <td><select name="fc" id="fc17">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="16">16 WR multiple reg</option>
+        </select></td>
+        <td><input  type="text" id='start17' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number17' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype17">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text" size="10"  id="read17" disabled  /></td>
+        <td><input type="text" size="10"  id="write17"   /></td>
+      </tr>
+      <tr align="center" >
+        <td><input name="namechannel3" id="namechannel18" type="text" /></td>
+        <td><input  id="address18" type="text"  size="2" /></td>
+        <td><select name="fc2" id="fc18">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="6">6 Write Simple Reg</option>
+        </select></td>
+        <td><input  type="text" id='start18' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number18' maxlength="5" size="3"/></td>
+        <td><select name="datatype2" id="datatype18">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input size="10" type="text"  id="read18" disabled  /></td>
+        <td><input size="10" type="text"  id="write18"   /></td>
+      </tr>
+      <tr align="center"  >
+        <td><input id="namechannel19" type="text" /></td>
+        <td><input id="address19" type="text"  size="2" /></td>
+        <td><select name="fc3" id="fc19">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="5">5 Force Single Coil</option>
+        </select></td>
+        <td><input  type="text" id='start19' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number19' maxlength="5" size="3"/></td>
+        <td><select name="datatype3" id="datatype19">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+        </select></td>
+        <td><input size="10" type="text"  id="read19" disabled  /></td>
+        <td><input size="10" type="text"  id="write19"   /></td>
+      </tr>
+      <tr  align="center">
+        <td><input name="namechannel5" id="namechannel20" type="text" /></td>
+        <td><input id="address20" type="text"  size="2" /></td>
+        <td><select name="fc4" id="fc20">
+          <option value="2">2 RO discrete inputs</option>
+          <option value="3">3 RO Holding Reg</option>
+          <option value="4">4 RO Input Reg</option>
+          <option value="5">5 Force Single Coil</option>
+        </select></td>
+        <td><input  type="text" id='start20' maxlength="5" size="3"/></td>
+        <td><input  type="text" id='number20' maxlength="5" size="3"/></td>
+        <td><select name="datatype4" id="datatype20">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits = 2 reg)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+        </select></td>
+        <td><input size="10" type="text"  id="read20" disabled  /></td>
+        <td><input size="10" type="text"  id="write20"   /></td>
+      </tr>
+</table>
+
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V316</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,12 @@
+gpis66ce.homelinux.com
+81
+ISAPI/Streaming/channels/101/picture
+admin
+ecapro123
+3
+gpis66da.homelinux.com
+81
+ISAPI/Streaming/channels/101/picture
+admin
+ECApro123
+3

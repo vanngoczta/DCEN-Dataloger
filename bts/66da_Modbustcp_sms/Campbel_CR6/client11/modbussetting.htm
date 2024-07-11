@@ -1,0 +1,817 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Modbus setting ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_modbussetting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('baudrate').value =		(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('timeout').value =		(rcd.length > 1)? rcd[1] : "";
+				var maxchannel=(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('numberchannel').value= maxchannel;		
+				document.getElementById('tupload').value = 		(rcd.length > 3)? rcd[3] : "";
+				document.getElementById('meslow').value = 		(rcd.length > 4)? rcd[4] : "";
+				document.getElementById('meshigh').value = 		(rcd.length > 5)? rcd[5] : "";
+				for(var i=0;i<21;i++)
+				{
+					if(i>=maxchannel)
+						document.getElementById('channel'+i).style.display="none";
+					document.getElementById('namechannel'+i).value= (rcd.length > i*9+6)? rcd[i*9+6] : "";
+					document.getElementById('address'+i).value = 	(rcd.length > i*9+7)? rcd[i*9+7] : "";
+					document.getElementById('fc'+i).value = 		(rcd.length > i*9+8)? rcd[i*9+8] : "";
+					document.getElementById('start'+i).value = 	 (rcd.length > i*9+9)? rcd[i*9+9] : "";
+					document.getElementById('number'+i).value = 	(rcd.length > i*9+10)? rcd[i*9+10] : "";
+					document.getElementById('datatype'+i).value =  (rcd.length > i*9+11)? rcd[i*9+11] : "";
+					document.getElementById('lo'+i).value = 		(rcd.length > i*9+12)? rcd[i*9+12] : "";
+					document.getElementById('hi'+i).value = 		(rcd.length > i*9+13)? rcd[i*9+13] : "";
+					document.getElementById('un'+i).value = 		(rcd.length > i*9+14)? rcd[i*9+14] : "";
+					
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	function isInt(n) 
+	{
+		return n != "" && !isNaN(n) && Math.round(n) == n;
+	}
+	function isFloat(n){
+		return n != "" && !isNaN(n) && Math.round(n) != n;
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		var maxchannel=document.getElementById('numberchannel').value;
+		stringval=stringval+document.getElementById('baudrate').value+';';
+		stringval=stringval+document.getElementById('timeout').value+';';
+		var numberchannel=Number(maxchannel);
+		if(isInt(numberchannel)==false)
+		{	alert("Error value Max Channel (24)");
+			return;
+		}
+		stringval=stringval+document.getElementById('numberchannel').value+';';
+		var tupload=Number(document.getElementById('tupload').value);
+		if(isInt(tupload)==false)
+		{	alert("Error value Write SQL interval");
+			return;
+		}
+		stringval=stringval+document.getElementById('tupload').value+';';
+		stringval=stringval+document.getElementById('meslow').value+';';
+		stringval=stringval+document.getElementById('meshigh').value;
+		for(var i=0;i<21;i++)
+		{
+			if(i>=maxchannel)
+				document.getElementById('channel'+i).style.display="none";
+			if(document.getElementById('namechannel'+i).value)
+			{
+				names=document.getElementById('namechannel'+i).value;
+				var rea=new RegExp('/', 'g');
+				var namesnew=names.replace(rea,':');
+				stringval=stringval+';'+namesnew+';';
+			}
+			else
+				return;
+			if(document.getElementById('address'+i).value)
+			{	if(Number(document.getElementById('address'+i).value)>0)
+					stringval=stringval+document.getElementById('address'+i).value+';';
+				else
+				{
+					alert("Error value Address Slave (>0): "+document.getElementById('address'+i).value);
+					return;
+				}
+			}
+			else
+				return;
+			stringval=stringval+document.getElementById('fc'+i).value+';';
+			stringval=stringval+document.getElementById('start'+i).value+';';
+			stringval=stringval+document.getElementById('number'+i).value+';';
+			stringval=stringval+document.getElementById('datatype'+i).value+';';
+			if(document.getElementById('lo'+i).value)
+				stringval=stringval+document.getElementById('lo'+i).value+';';
+			else
+				return;
+			if(document.getElementById('hi'+i).value)	
+				stringval=stringval+document.getElementById('hi'+i).value+';';
+			else
+				return;
+			units=document.getElementById('un'+i).value;
+			var re=new RegExp('/', 'g');
+			var unitsnew=units.replace(re,':');
+			stringval=stringval+unitsnew;
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_modbussetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbustcp.htm" style="text-decoration:none"><font size="4"><strong>Modbus TCP Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="networksetting.html" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+    <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666"><font color="#FFFFFF"><b>MODBUS MASTER SETTING </b></font></td>
+      <td bgcolor="#666666" align="center"><a href="calibrationsetting.htm" style="text-decoration:none"><font size="4" color="#FFFFFF"><strong><u>Calibration Setting</u></strong></font></a></td>
+    </tr>
+  </table>
+  <p>
+	<label><strong>Serial Port:</strong></label>
+  </p>
+    <table width="100%" border="1">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Baud</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Data bits</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Stop bits</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Parity</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Serial Timeout (0.1-10 sec)</strong></td>
+  </tr>
+  <tr align="center">
+    <td><select name="bau"  id="baudrate">
+      <option value="4800">4800</option>
+      <option value="9600">9600</option>
+      <option value="19200">19200</option>
+    </select></td>
+    <td>8</td>
+    <td>1</td>
+    <td>none</td>
+    <td><input name="timeout" type="text" id="timeout" maxlength="5" min="0.1"  step="0.1" /></td>
+  </tr>
+    </table>
+
+    <p>
+    <label><strong>Modbus RTU Setting :</strong></label>
+    </p>
+<table width="100%" border="0" align="center">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>Tag Name</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Address Slave </strong></td>
+    <td bgcolor="#CCCCCC"><strong>Function code </strong></td>
+    <td bgcolor="#CCCCCC"><strong>Register</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Data type</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Low Setpoint</strong></td>
+    <td bgcolor="#CCCCCC"><strong>High Setpoint</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Unit</strong></td>
+  </tr>
+  <tr align="center" id="channel0">
+    <td>1
+      <input name="na0" id="namechannel0" type="text" maxlength="18"> </td>
+    <td><input name="as0" id="address0" type="text"  min='1' maxlength="3" size="3"></td>
+    <td><select name="fc0" id="fc0">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="7" >A0 4-20mA</option>
+      <option value="10">10 RO Field1 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="23">23 IN1 Rain (rainfall in the hour mm/h)</option>
+	  <option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start0' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number0' maxlength="5" size="3"/></td>
+    <td><select name="datatype0" id="datatype0">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo0"  size="6" /></td>
+    <td><input type="text"  id="hi0"  size="6" /></td>
+    <td><input name="un0" type="text"  id="un0" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr align="center" id="channel1">
+    <td>2
+      <input name="namechannel" id="namechannel1" type="text" maxlength="18" /></td>
+    <td><input name="address1" id="address1" type="text"  min='1' maxlength="3" size="3" /></td>
+    <td><select name="fc1" id="fc1">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+	  <option value="7" >A1 4-20mA</option>
+      <option value="10">10 RO Field2 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="23">23 IN2 Rain Gause </option>
+      <option value="24">24 Rainfall during the day (mm/24h) </option>
+	  <option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start1' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number1' maxlength="5" size="3" /></td>
+    <td><select name="datatype1" id="datatype1">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo1"  size="6" /></td>
+    <td><input type="text"  id="hi1"  size="6" /></td>
+    <td><input name="un1" type="text"  id="un1" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr align="center" id="channel2">
+    <td>3
+      
+      <input name="namechannel" id="namechannel2" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address2" type="text" min='1' maxlength="3" size="3"/></td>
+    <td><select name="fc" id="fc2">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+	 <option value="5">5 Force Single Coil</option>
+     <option value="6">6 WR Multi Reg</option>
+     <option value="7" >A2 4-20mA</option>
+     <option value="10">10 RO Field3 Thing</option>
+     <option value="11">11 Modbus TCP </option>
+     <option value="25">25 Maximum rainfall (mm/h) </option>
+	 <option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start2' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number2' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype2">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String (Reg=0 Time, Reg=1 Alarm, Reg=2 Data)</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo2"  size="6" /></td>
+    <td><input type="text"  id="hi2"  size="6" /></td>
+    <td><input name="un" type="text"  id="un2" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr align="center" id="channel3">
+    <td>4
+      <input name="namechannel" id="namechannel3" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address3" type="text" min='1' maxlength="3" size="3" /></td>
+    <td><select name="fc6" id="fc3">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="5">5 Force Single Coil</option>
+      <option value="7" >A3 4-20mA</option>
+      <option value="6">6 WR Multi Reg</option>
+      <option value="10">10 RO Field4 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="26">26 Maximum rainfall (hour in day)</option>
+	  <option value="32">Campbell 192.168.1.110</option>
+    </select></td>
+    <td><input type="text" id='start3' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number3' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype3">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      <option value="4" >String (Reg=0 Time, Reg=1 Alarm, Reg=2 Data)</option>
+    </select></td>
+    <td><input type="text"  id="lo3"  size="6" /></td>
+    <td><input type="text"  id="hi3"  size="6" /></td>
+    <td><input name="un" type="text"  id="un3" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr align="center" id="channel4">
+    <td>5
+      <input name="namechannel" id="namechannel4" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address4" type="text" min='1' maxlength="3" size="3" /></td>
+    <td><select name="fc" id="fc4">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="5">5 Force Single Coil</option>
+      <option value="6">6 WR Multi Reg</option>
+      <option value="7" >A4 4-20mA</option>
+      <option value="10">10 RO Field5 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="19">19 Total Flow (Address Slave) </option>
+      <option value="27">27 Maximum rainfall by day (mm/day)</option>
+	  <option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start4' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number4' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype4">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo4"  size="6" /></td>
+    <td><input type="text"  id="hi4"  size="6" /></td>
+    <td><input name="un" type="text"  id="un4" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr  align="center" id="channel5">
+    <td>6
+      <input name="namechannel" id="namechannel5" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address5" type="text" min='1' maxlength="3" size="3"/></td>
+    <td><select name="fc" id="fc5">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="5">5 Force Single Coil</option>
+      <option value="6">6 WR Single Reg</option>
+      <option value="7" >A5 4-20mA</option>
+      <option value="10">10 RO Field6 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+       <option value="19">19 Total Flow (Address Slave) </option>
+      <option value="28">28 Maximum rainfall day (yymmdd) </option>
+	  <option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start5' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number5' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype5">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo5"  size="6" /></td>
+    <td><input type="text"  id="hi5"  size="6" /></td>
+    <td><input name="un" type="text"  id="un5" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr align="center" id="channel6">
+    <td>7
+      <input name="namechannel" id="namechannel6" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address6" type="text" min='1' maxlength="3" size="3"/></td>
+    <td><select name="fc5" id="fc6">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="6">6 WR Single Reg</option>
+      <option value="7" >A6 4-20mA</option>
+      <option value="10">10 RO Field7 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="16">16 WR Multi Reg</option>
+       <option value="19">19 Total Flow (Address Slave) </option>
+	<option value="29">29 Continuous Rainfall (total mm) </option>
+	<option value="32">Campbell 192.168.1.110</option>
+    </select></td>
+    <td><input type="text" id='start6' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number6' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype6">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo6"  size="6" /></td>
+    <td><input type="text"  id="hi6"  size="6" /></td>
+    <td><input name="un" type="text"  id="un6" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr  align="center" id="channel7">
+    <td>8
+      <input name="namechannel" id="namechannel7" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address7" type="text" min='1' maxlength="3" size="3" /></td>
+    <td><select name="fc" id="fc7">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="6">6 WR Single Reg</option>
+      <option value="7" >A7 4-20mA</option>
+      <option value="10">10 RO Field8 Thing</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="16">16 WR Multi Reg</option>
+       <option value="19">19 Total Flow (Address Slave)</option>
+	<option value="30">30 Long duration of rain(hour)</option>
+	<option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start7' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number7' maxlength="5" size="3" /></td>
+    <td><select name="datatype" id="datatype7">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo7"  size="6" /></td>
+    <td><input type="text"  id="hi7"  size="6" /></td>
+    <td><input name="un" type="text"  id="un7" size="3" maxlength="5"  /></td>
+  </tr>
+  <tr  align="center" id="channel8">
+    <td>9
+      <input name="namechannel" id="namechannel8" type="text" maxlength="18" /></td>
+    <td><input name="address" id="address8" type="text" min='1' maxlength="3" size="3"/></td>
+    <td><select name="fc" id="fc8">
+      <option value="2">2 RO discrete in</option>
+      <option value="3">3 RO Holding Regs</option>
+      <option value="4">4 RO Input Regs</option>
+      <option value="6">6 WR Single Reg</option>
+      <option value="11">11 Modbus TCP </option>
+      <option value="16">16 WR Multi Reg</option>
+       <option value="19">19 Total Flow (Address Slave) </option>
+	<option value="31">31 Rain time end (yymmddhh)</option>
+	<option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+    <td><input type="text" id='start8' maxlength="5" size="3"/></td>
+    <td><input type="text" id='number8' maxlength="5" size="3"/></td>
+    <td><select name="datatype" id="datatype8">
+      <option value="0" >Bit</option>
+      <option value="1" >Register Integer</option>
+      <option value="2" >Long (32 bits)</option>
+      <option value="3" >Float (32 or 64 bits)</option>
+      <option value="4" >String</option>
+      <option value="5" >Registers Integers</option>
+      </select></td>
+    <td><input type="text"  id="lo8"  size="6" /></td>
+    <td><input type="text"  id="hi8"  size="6" /></td>
+    <td><input name="un" type="text"  id="un8" size="3" maxlength="5"  /></td>
+  </tr>
+    <tr align="center" id="channel9">
+      <td>10
+        <input name="namechannel" id="namechannel9" type="text" maxlength="18" /></td>
+      <td><input name="address" id="address9" type="text" min='1' maxlength="3" size="3" /></td>
+      <td><select name="fc" id="fc9">
+        <option value="2">2 RO discrete in</option>
+        <option value="3">3 RO Holding Regs</option>
+        <option value="4">4 RO Input Regs</option>
+        <option value="6">6 WR Single Reg</option>
+        <option value="11">11 Modbus TCP </option>
+		<option value="32">Campbell 192.168.1.110</option>
+      </select></td>
+      <td><input type="text" id='start9' maxlength="5" size="3"/></td>
+      <td><input type="text" id='number9' maxlength="5" size="3" /></td>
+      <td><select name="datatype" id="datatype9">
+        <option value="0" >Bit</option>
+        <option value="1" >Register Integer</option>
+        <option value="2" >Long (32 bits)</option>
+        <option value="3" >Float (32 or 64 bits)</option>
+        <option value="4" >String</option>
+        <option value="5" >Registers Integers</option>
+        </select></td>
+      <td><input type="text"  id="lo9"  size="6" /></td>
+      <td><input type="text"  id="hi9"  size="6" /></td>
+      <td><input name="un" type="text"  id="un9" size="3" maxlength="5"  /></td>
+    </tr>
+      <tr align="center" id="channel10">
+        <td>11
+          <input name="namechannel" id="namechannel10" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address10" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc10">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="6">6 WR Single Reg</option>
+          <option value="11">11 Modbus TCP </option>
+		  <option value="32">Campbell 192.168.1.110</option>
+        </select></td>
+        <td><input type="text" id='start10' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number10' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype10">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo10"  size="6" /></td>
+        <td><input type="text"  id="hi10"  size="6" /></td>
+        <td><input name="un" type="text"  id="un10" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr  align="center" id="channel11">
+        <td>12
+          <input name="namechannel" id="namechannel11" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address11" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc11">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start11' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number11' maxlength="5" size="3" /></td>
+        <td><select name="datatype" id="datatype11">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo11"  size="6" /></td>
+        <td><input type="text"  id="hi11"  size="6" /></td>
+        <td><input name="un" type="text"  id="un11" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr align="center" id="channel12">
+        <td>13
+          <input name="namechannel" id="namechannel12" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address12" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc12">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start12' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number12' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype12">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo12"  size="6" /></td>
+        <td><input type="text"  id="hi12"  size="6" /></td>
+        <td><input name="un" type="text"  id="un12" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr  align="center" id="channel13">
+        <td>14
+          <input name="namechannel" id="namechannel13" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address13" type="text" min='1' maxlength="3" size="3"/></td>
+        <td><select name="fc" id="fc13">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start13' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number13' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype13">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo13"  size="6" /></td>
+        <td><input type="text"  id="hi13"  size="6" /></td>
+        <td><input name="un" type="text"  id="un13" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr align="center" id="channel14">
+        <td>15
+          <input name="namechannel" id="namechannel14" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address14" type="text" min='1' maxlength="3" size="3"/></td>
+        <td><select name="fc" id="fc14">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start14' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number14' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype14">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo14"  size="6" /></td>
+        <td><input type="text"  id="hi14"  size="6" /></td>
+        <td><input name="un" type="text"  id="un14" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr align="center" id="channel15">
+        <td>16
+          <input name="namechannel" id="namechannel15" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address15" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc15">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start15' maxlength="5" size="3" /></td>
+        <td><input type="text" id='number15' maxlength="5" size="3" /></td>
+        <td><select name="datatype" id="datatype15">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo15"  size="6" /></td>
+        <td><input type="text"  id="hi15"  size="6" /></td>
+        <td><input name="un" type="text"  id="un15" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr  align="center" id="channel16">
+        <td>17
+          <input name="namechannel" id="namechannel16" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address16" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc16">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start16' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number16' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype16">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo16"  size="6" /></td>
+        <td><input type="text"  id="hi16"  size="6" /></td>
+        <td><input name="un" type="text"  id="un16" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr align="center" id="channel17">
+        <td>18
+          <input name="namechannel2" id="namechannel17" type="text" maxlength="18" /></td>
+        <td><input name="address" id="address17" type="text" min='1' maxlength="3" size="3" /></td>
+        <td><select name="fc" id="fc17">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+          <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start17' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number17' maxlength="5" size="3"/></td>
+        <td><select name="datatype" id="datatype17">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo17"  size="6" /></td>
+        <td><input type="text"  id="hi17"  size="6" /></td>
+        <td><input name="un" type="text"  id="un17" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr  align="center" id="channel18">
+        <td>19
+          <input name="namechannel3" id="namechannel18" type="text" maxlength="18" /></td>
+        <td><input name="address2" id="address18" type="text" min='1'  maxlength="3" size="3" /></td>
+        <td><select name="fc2" id="fc18">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+      	<option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start18' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number18' maxlength="5" size="3"/></td>
+        <td><select name="datatype2" id="datatype18">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+          <option value="5" >Registers Integers</option>
+        </select></td>
+        <td><input type="text"  id="lo18"  size="6" /></td>
+        <td><input type="text"  id="hi18"  size="6" /></td>
+        <td><input name="un2" type="text"  id="un18" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr  align="center" id="channel19">
+        <td>20
+          <input id="namechannel19" type="text" maxlength="18" /></td>
+        <td><input id="address19" type="text" min='1'  maxlength="3" size="3" /></td>
+        <td><select name="fc3" id="fc19">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+        <option value="5">5 Force Single Coil</option>
+        <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start19' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number19' maxlength="5" size="3"/></td>
+        <td><select name="datatype3" id="datatype19">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+        </select></td>
+        <td><input type="text"  id="lo19"  size="6" /></td>
+        <td><input type="text"  id="hi19"  size="6" /></td>
+        <td><input name="un3" type="text"  id="un19" size="3" maxlength="5"  /></td>
+      </tr>
+      <tr align="center" id="channel20">
+        <td>21
+          <input name="namechannel5" id="namechannel20" type="text" maxlength="18" /></td>
+        <td><input name="address4" id="address20" type="text" min='1'  maxlength="3" size="3" /></td>
+        <td><select name="fc4" id="fc20">
+          <option value="2">2 RO discrete in</option>
+          <option value="3">3 RO Holding Regs</option>
+          <option value="4">4 RO Input Regs</option>
+        <option value="5">5 Force Single Coil</option>
+        <option value="11">11 Modbus TCP </option>
+        </select></td>
+        <td><input type="text" id='start20' maxlength="5" size="3"/></td>
+        <td><input type="text" id='number20' maxlength="5" size="3"/></td>
+        <td><select name="datatype4" id="datatype20">
+          <option value="0" >Bit</option>
+          <option value="1" >Register Integer</option>
+          <option value="2" >Long (32 bits)</option>
+          <option value="3" >Float (32 or 64 bits)</option>
+          <option value="4" >String</option>
+        </select></td>
+        <td><input type="text"  id="lo20"  size="6" /></td>
+        <td><input type="text"  id="hi20"  size="6" /></td>
+        <td><input name="un4" type="text"  id="un20" size="3" maxlength="5"  /></td>
+      </tr>
+    </table>
+<p>
+    <label><strong>Common Setting :</strong></label>
+  </p>
+ 
+        <table width="100%" border="1">
+  <tr>
+    <td bgcolor="#CCCCCC"><strong>Write SQL and FTP1   interval  (min)</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Max Channel (21)</strong></td>
+    </tr>
+  <tr>
+    <td><input name="tup" type="text" id="tupload" maxlength="2" min="1" ></td>
+    <td><input name="mso" id="numberchannel" type="text" min="1" max="21" /></td>
+    </tr>
+</table>
+<p>
+    <label><strong>Message to SMS and Email:</strong></label>
+  </p>
+<table width="100%" border="1">
+  <tr>
+    <td bgcolor="#CCCCCC"><strong>Message Low Setpoint</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Message High Setpoint</strong></td>
+  </tr>
+  <tr>
+    <td><input name="mesl" type="text" id="meslow" maxlength="15" /></td>
+    <td><input name="mesh" type="text"  id="meshigh" maxlength="15" /></td>
+  </tr>
+</table>
+<span id="result"></span> 
+  <p>
+	  <input name="Button" type="button" onclick="Savesetting()" value="Save Settings" />
+  </p>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2017 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V1017</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

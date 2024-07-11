@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Alarm ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Liststation="";
+var Channel=[];
+webiopi().ready(function() 
+{	
+	// Following function will process data received from set/getLightHours macro.
+    var receiverdata = function(macro, args, response) 
+	{
+            var data = response.split(",");
+			//alert (data);
+            // Following lines use jQuery functions
+			var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response, dataTable);
+			resizeTable();
+    }
+});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           listnamechannel();
+		   // Call the macro
+           webiopi().callMacro("load_alarm_tablet",[], receiverdatas);
+    }
+	function receiverdatas(macro, args, response) 
+	{
+			
+			var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response, dataTable);
+			resizeTable();
+    }
+	//Liet ke su kien lien quan den gio
+	function ListChannelDays()
+	{
+		var channel=Channel[document.getElementById('channel').value];
+		 // Arguments sent to the macro
+         var index = [$("#days").val(),channel];
+         // Call the macro
+         webiopi().callMacro("load_alarm_tablet_day_channel", index, receiverdatas);
+		 document.getElementById('result').innerHTML="Loading...";
+	}
+	//Liet ke su kien lien quan den channel, ngay thang
+	function ListChannelDate()
+	{
+		var channel=Channel[document.getElementById('channel').value];
+		// Arguments sent to the macro, id channel
+        var index = [$("#startdate").val(),$("#enddate").val(),channel];
+        // Call the macro
+        webiopi().callMacro("load_alarm_tablet_date_channel",index, receiverdatas);
+		document.getElementById('result').innerHTML="Loading...";
+	}
+	//Macro liet ke ten du lieu
+	function listnamechannel()
+	{
+		webiopi().callMacro("Listnamechannel",[], receivernamechannel);
+		//LoadData();
+		
+	}
+	//Liet ke ten cua cac kenh du lieu
+	function receivernamechannel(macro, args, response) 
+	{
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{	
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					var data='idchannel'+i;
+					var idchannel = (rcd.length > i)? rcd[i] : "";
+					if(document.getElementById(data))
+						document.getElementById(data).innerHTML=idchannel;
+						Channel[i]=idchannel;
+					
+				}
+			}
+		}
+	}
+//------------------------------------------------------------
+    // convenience: wrap value in specified font
+    function setFont(val, face, size) {
+        var s = "<font";
+        s += " face='" + face + "'";
+        s += "size=" + size;
+        s += ">";
+        s += val;
+        s += "</font>";
+        return s;
+    }
+    
+    // convenience: set header font
+    function hdrFont(val) {
+       return "<center><b>" + setFont(val, "arial", 3) + "</b></center>";
+    }
+    
+    // convenience: set data font
+    function dtaFont(val) {
+       return "<center>" + val + "</center>";
+    }
+		function getWindowHeight() {
+        var winHeight = 0;
+        if (typeof(window.innerWidth) == 'number') {
+            // Non-IE
+            winHeight = window.innerHeight; // innerWidth
+        } else 
+        if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+            // IE 6+ in 'standards compliant mode'
+            winHeight = document.documentElement.clientHeight; // clientWidth
+        } else 
+        if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+            //IE 4 compatible
+            winHeight = document.body.clientHeight; // clientWidth
+        }
+        //window.alert( 'Height = ' + winHeight);
+        return winHeight;
+    }
+	// return the absolute Y offset of an object (relative to page
+    function getAbsoluteOffsetTop(obj) {
+        var absTop = 0;
+        if (obj.offsetParent) {
+            for (; obj.offsetParent; obj = obj.offsetParent) {
+                absTop += obj.offsetTop;
+            }
+        } else
+        if (obj.y) {
+            absTop += obj.y;
+        }
+        return absTop;
+    }
+	 // on resize
+    function resizeTable() {
+        var dataTableDiv = document.getElementById('data_table_div');
+        var last_hr      = document.getElementById('last_hr');
+        var winHeight    = getWindowHeight();
+        var dataHeight   = (winHeight - last_hr.clientHeight) - getAbsoluteOffsetTop(dataTableDiv) - 25;
+        //alert("Table height: [" + getAbsoluteOffsetTop(dataTableDiv) + "] " + dataHeight);
+        if (dataHeight > 25) {
+            dataTableDiv.style.height = dataHeight + "px";
+        } else {
+            dataTableDiv.style.height = "auto";
+        }
+    }
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function populateDataTable(text, dataTable)
+{	// the following limits the number of 'pushPins' placed on the map to the last MAX_PUSH_PINS points.
+	var indexst=0;
+	var totalevent=0;
+	var MAX_PUSH_PINS = 40; // arbitrary limit
+	var last_date=0;
+	var color_date=0;
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			var ndx = 0;
+			var IndexWidth = 10, TimeDateWidth = 15, ValueWidth = 75;
+			var tableData = "";
+			tableData += "<table id='data_table' width='100%' cellspacing='0' cellpadding='0' border='1'>\n";
+			tableData += "<thead><tr bgcolor=\"#FFFF00\">";
+			tableData += "<td width="+IndexWidth+"% nowrap>" + hdrFont("ID","verdana","4") + "</td>";
+			tableData += "<td width="+TimeDateWidth+"% nowrap>" + hdrFont("Date","verdana","4") + "</td>";
+			tableData += "<td width="+TimeDateWidth+"% nowrap>" + hdrFont("Time","verdana","4") + "</td>";
+			tableData += "<td width="+ValueWidth +"% nowrap>"  + hdrFont("Event (Alarm)","verdana","4") + "</td>";
+            tableData += "</tr></thead>\n";
+			tableData += "<tbody id='data_tbody'>\n";
+			var startNdx = rcd.length - MAX_PUSH_PINS - 1; // '- 1' because the last 'rcd' is blank
+			//alert(rcd);
+			if (startNdx < 0) 
+			{ startNdx = 0; }
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+						var id			= 	(fld.length > 0)? fld[0] : "";
+						var date		= 	(fld.length > 1)? fld[1] : "";
+						var n = date.localeCompare(last_date);
+						if(n!=0 && color_date==0)
+							color_date=1;
+						else if(n!=0 && color_date==1)
+							color_date=0;
+						last_date=date;
+						
+						var time  		= 	(fld.length > 2)? fld[2] : "";
+						var eventalarm	= 	(fld.length > 3)? fld[3] : "";
+					
+						tableData += "<tr>";
+							
+						tableData += "<td width="+IndexWidth + "% nowrap>" + dtaFont(id) + "</td>";
+						if(color_date)
+							tableData += "<td bgColor=#e6ffff>"  + dtaFont(date) + "</td>";
+						else
+							tableData += "<td bgColor=#ffffb3>"  + dtaFont(date) + "</td>";
+						tableData += "<td width="+TimeDateWidth+"% nowrap>" + dtaFont(time) + "</td>";
+						tableData += "<td width="+ValueWidth+"% nowrap>" + dtaFont(eventalarm) + "</td>";
+						
+						tableData += "</tr>\n";
+						totalevent=totalevent+1;	
+					}
+				}
+			}
+			tableData += "</tbody>\n";
+			tableData += "</table>\n";
+			dataTable.innerHTML = tableData;
+			
+		}
+		else 
+			{
+              	dataTable.innerHTML = "(No data) " + text;
+          	}
+	}
+	else 
+	  		{
+          		dataTable.innerHTML = "Null data";
+       		}
+	document.getElementById('result').innerHTML="Loaded Data: "+ totalevent ;
+	//alert(Liststation);
+	return true;
+}
+//---------------------Get Excel--------------------------------------
+function tabletoExcel(table, name) {
+    var uri = 'data:application/vnd.ms-excel;base64,'
+          , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+          , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))); }
+          , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }); };
+        if (!table.nodeType) table = document.getElementById(table);
+        var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+        window.location.href = uri + base64(format(template, ctx));
+
+}
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents()" >
+<div id="navbar">
+   
+    <a href="index.htm" class="btn btn-primary rounded-0 me-1 border border-2 border-success">Home</a>
+		<a  href="historytrend.htm" class=" btn btn-primary rounded-0 me-1 border border-2 border-success">History Trend</a>
+		<a href="historydata.htm" class="  btn btn-primary rounded-0 me-1 border border-2 border-success">History Data</a>
+		<a href="alarmdata.htm" class="active btn btn-primary rounded-0 me-1 border border-2 border-success">Data Alarm</a>
+		<a href="modbussetting.htm" class="btn btn-primary rounded-0 me-1 border border-2 border-success">Modbus RTU Setting</a>
+<a href="JavaScript:window.print()"><img src="print.gif" border="0" /></a>
+ <img class="btn btn-primary" height="48px" src="download_icon.gif" onClick="tabletoExcel('data_table_div','Datalog')" border="0" />
+<span id="result">Loading...</span>
+</div>
+<table width="100%" border="2">
+  <tr>
+    <td bordercolor="#ECE9D8" class="bg-dark border border-2"><font color="#FFFFFF"><strong>Days To Include In Feed (1 - 9)</strong></font></td>
+    <td><div align="left">
+      <p>
+        <input class="w-25" name="hour" type="number" id="days" value="1" maxlength="1" />
+        <select class="w-25" name="channel" id="channel">
+          <option value="0" id="idchannel0"></option>
+          <option value="1" id="idchannel1"></option>
+          <option value="2" id="idchannel2"></option>
+          <option value="3" id="idchannel3"></option>
+          <option value="4" id="idchannel4"></option>
+          <option value="5" id="idchannel5"></option>
+          <option value="6" id="idchannel6"></option>
+          <option value="7" id="idchannel7"></option>
+          <option value="8" id="idchannel8"></option>
+          <option value="9" id="idchannel9"></option>
+          <option value="10" id="idchannel10"></option>
+          <option value="11" id="idchannel11"></option>
+          <option value="12" id="idchannel12"></option>
+          <option value="13" id="idchannel13"></option>
+          <option value="14" id="idchannel14"></option>
+          <option value="15" id="idchannel15"></option>
+          <option value="16" id="idchannel16"></option>
+          <option value="17" id="idchannel17"></option>
+          <option value="18" id="idchannel18"></option>
+          <option value="19" id="idchannel19"></option>
+        </select>
+        <input class="w-25 btn btn-danger" name="Button" type="button" onclick="ListChannelDays()" value="Load Data" id="button1" />
+      </p>
+    </div></td>
+  </tr>
+  <tr>
+    <td bordercolor="#ECE9D8" class="bg-dark border border-2"><strong><font color="#FFFFFF">Start Date - End Date (YYYY-MM-DD) </font></strong></td>
+    <td><div align="left">
+      <p>
+        <input class="w-25" name="startdate" type="date" id="startdate" />
+        <input class="w-25" name="enddate" type="date" id="enddate" />
+        <input class="w-25 btn btn-danger" name="Button" type="button" onclick="ListChannelDate()" value="Load Data" />
+      </p>
+    </div></td>
+  </tr>
+</table>
+<hr id='last_hr'>
+<div id='data_table_div' style="overflow-x: hidden;"></div>
+	  
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+<tr>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2017 DCEN.VN</font></strong></font></div></a></td>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V1217</font></strong></font></div></td>
+</tr>
+</table>
+</body>
+</html>

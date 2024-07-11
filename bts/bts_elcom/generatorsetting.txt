@@ -1,0 +1,20 @@
+1 Low Oil
+1 Normal Oil
+1 Low  Fuel
+1 Full  Fuel
+1 High Water Temp
+1 Normal Water Temp
+1 Low Battery Volt
+1 Normal Battery Volt
+1 Gennerator On
+1 Gennerator Off
+2 Low Oil
+2 Normal Oil
+2 Low  Fuel
+2 Full  Fuel
+2 High Water Temp
+2 Normal Water Temp
+2 Low Battery Volt
+2 Normal Battery Volt
+2 Gennerator On
+2 Gennerator Off

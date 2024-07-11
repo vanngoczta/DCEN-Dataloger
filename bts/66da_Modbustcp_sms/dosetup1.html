@@ -1,0 +1,579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>DO SENSOR ECA-GPIs6.6DA</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_dosensor",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				for(var i=0;i<26;i++)
+				{
+					var read= (rcd.length > i*7+5)? rcd[i*7+5] : "";
+					var writei= (rcd.length > i*7+6)? rcd[i*7+6] : "";
+					if(i==11 && read=='0')
+						document.getElementById('tran'+i).innerHTML ='mg/l';
+					else if(i==11 && read=='2')
+						document.getElementById('tran'+i).innerHTML ='ppm';
+					else if(i==11 && read=='10')
+						document.getElementById('tran'+i).innerHTML ='%';
+					
+					else if(i==12 && read=='25')
+						document.getElementById('tran'+i).innerHTML ='Celsius oC';
+					else if(i==12 && read=='26')
+						document.getElementById('tran'+i).innerHTML='Fahrenheit oF';
+					
+					else if(i==15 && read=='45')
+						document.getElementById('tran'+i).innerHTML ='mmHg';
+					else if(i==15 && read=='43')
+						document.getElementById('tran'+i).innerHTML ='Feet';
+					else if(i==15 && read=='13')
+						document.getElementById('tran'+i).innerHTML ='Meters';
+					
+					else if(i==17 && read=='51')
+						document.getElementById('tran'+i).innerHTML ='mS/cm';
+					else if(i==17 && read=='55')
+						document.getElementById('tran'+i).innerHTML ='mMol/L';
+
+					else if(i==22 && read=='0')
+						document.getElementById('tran'+i).innerHTML ='Active';
+					else if(i==22 && read=='1')
+						document.getElementById('tran'+i).innerHTML ='Hold';
+					else if(i==22 && read=='2')
+						document.getElementById('tran'+i).innerHTML ='Transfer';
+					
+		
+					if(document.getElementById('read'+i))
+						document.getElementById('read'+i).innerHTML = read	 ;
+
+					if(document.getElementById('write'+i))
+						document.getElementById('write'+i).value = writei	  ;
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Scanning...";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Doc du lieu cam bien
+	function Read()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<26;i++)
+		{
+			stringval=stringval+i+';';
+			stringval=stringval+'3;';		// Read register
+			stringval=stringval+document.getElementById('start'+i).value+';';
+			stringval=stringval+document.getElementById('number'+i).value+';';
+			stringval=stringval+document.getElementById('datatype'+i).value+';';
+			stringval=stringval+document.getElementById('read'+i).innerHTML+';';
+			if(document.getElementById('write'+i))
+				stringval=stringval+document.getElementById('write'+i).value+';';
+			else
+				stringval=stringval+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("run_readDOsensor",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Scanning...";
+		setTimeout(callMacro_Listevents,10000);
+		Flag=1;
+	}
+		
+	//Ghi du lieu cam bien
+	function Write()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		for(var i=0;i<26;i++)
+		{
+			stringval=stringval+i+';';
+			if(document.getElementById('write'+i))
+			{
+				if(i==22 || i==23)
+					stringval=stringval+'6;';			//write register
+				else
+					stringval=stringval+'16;';		   //write register
+			}
+			else
+				stringval=stringval+'3;';			//read register	
+			stringval=stringval+document.getElementById('start'+i).value+';';
+			stringval=stringval+document.getElementById('number'+i).value+';';
+			stringval=stringval+document.getElementById('datatype'+i).value+';';
+			stringval=stringval+document.getElementById('read'+i).innerHTML+';';
+			if(document.getElementById('write'+i))
+				stringval=stringval+document.getElementById('write'+i).value+';';
+			else
+				stringval=stringval+';';
+		}
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("run_readDOsensor",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Writting...";
+		setTimeout(callMacro_Listevents,10000);
+		Flag=1;
+	}
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+  	function callMacro_UpdateMonitor()
+    {
+       	// Get data from macro
+	   	webiopi().callMacro("UpdateMonitorAll", [], ReceiverValueReal);	
+	}
+	//Doc gia tri lien tuc
+	function ReceiverValueReal(macro, args, text) 
+	{
+        if (text != null) 
+		{
+			var rcd = text.split('\r\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{
+				var flagindex = 0;
+				var tableData = "";
+				// Time | channel | namechannel | value | unit | status | Input | Output
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					if (rcd[i].trim() != "") 
+					{	
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+							var name 		 = 	(fld.length > 0)? fld[0] : "";
+							var value  		= 	(fld.length > 1)? fld[1] : "";
+							var units  		= 	(fld.length > 2)? fld[2] : "";
+							var status  		= 	(fld.length > 3)? fld[3] : "";
+							if(i==4)
+								document.getElementById('real0').innerHTML=value+" "+document.getElementById('tran11').innerHTML;
+							if(i==5)
+								document.getElementById('real1').innerHTML=value+" "+document.getElementById('tran12').innerHTML;
+							if(i==6)
+								document.getElementById('real2').innerHTML=value+" mV";
+							if(i==7)
+								document.getElementById('real3').innerHTML=value;
+							
+						}
+					}
+				}
+			}
+		}
+    }
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<table border="0" width="100%">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="modbussetting.htm" style="text-decoration:none"><font size="4"><strong>Modbus Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="config.htm" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+<div id="content">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+        <tr bgcolor="#FF0000" fgcolor="white">
+      <td bgcolor="#666666" width="50%"><font color="#FFFFFF"><b>DO SENSOR</b></font></td>
+      </tr>		
+</table>
+<span id="result"></span>	
+  <table width="100%"  border="0" id="diagtest2">
+    <tr align="center">
+      <td bgcolor="#CCCCCC"><strong>Do Meas</strong></td>
+      <td   bgcolor="#CCCCCC"><strong>Temperature</strong></td>
+      <td bgcolor="#CCCCCC"><strong>Do mV</strong></td>
+      <td    bgcolor="#CCCCCC"><strong>Do Adc Counts</strong></td>
+    </tr>
+    <tr align="center">
+      <td><span id='real0'></span></td>
+      <td><span id='real1'></span></td>
+      <td><span id='real2'></span></td>
+      <td><span id='real3'></span></td>
+    </tr>
+  </table>
+  <p>
+    <input name="Button" type="button" onclick="Read()" value="Read Devices" />
+  </p>
+	<table width="100%"  border="0">
+	  <tr align="center">
+	    <td bgcolor="#CCCCCC"><strong>PROBE INFO</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Register</strong></td>
+	    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+	    <td    bgcolor="#CCCCCC"><strong>Data type</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Read</strong></td>
+      </tr>
+	  <tr align="center">
+	    <td><input  id="namechannel21" type="text" value="Sensor Name"/></td>
+	    <td><input  type="text" id='start0' maxlength="5" size="3" value="6"/>
+	      40007</td>
+	    <td><input  type="text" id='number0' maxlength="5" size="3" value="6"/></td>
+	    <td><select name="datatype5" id="datatype0">
+	      <option value="4" >String</option>
+	      </select></td>
+	    <td><span id='read0'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel9" id="namechannel17" type="text" value="Serial Number" /></td>
+	    <td><input  type="text" id='start1' maxlength="5" size="3" value="41"/>
+	      40042</td>
+	    <td><input  type="text" id='number1' maxlength="5" size="3" value="6" /></td>
+	    <td><select name="datatype11" id="datatype1">
+	      <option value="4" >String</option>
+	      </select></td>
+	    <td><span id='read1'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel4" id="namechannel22" type="text" value="Do meas" /></td>
+	    <td><input  type="text" id='start2' maxlength="5" size="3" value="1"/>
+	      40002</td>
+	    <td><input  type="text" id='number2' maxlength="5" size="3" value="2" /></td>
+	    <td><select name="datatype5" id="datatype2">
+	      <option value="3" >Float (32 or 64 bits)</option>
+	      </select></td>
+	    <td><span id='read2'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel7" id="namechannel24" type="text" value="Status Sensor" /></td>
+	    <td><input  type="text" id='start3' maxlength="5" size="3" value="9930"/>
+	      49931</td>
+	    <td><input  type="text" id='number3' maxlength="5" size="3" value="0" /></td>
+	    <td><select name="datatype9" id="datatype3">
+	      <option value="1" >Register Integer</option>
+	      </select></td>
+	    <td><span id='read3'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel7" id="namechannel24" type="text" value="Error Sensor" /></td>
+	    <td><input  type="text" id='start4' maxlength="5" size="3" value="9929"/>
+	      49930</td>
+	    <td><input  type="text" id='number4' maxlength="5" size="3" value="0" /></td>
+	    <td><select name="datatype9" id="datatype4">
+	      <option value="1" >Register Integer</option>
+	      </select></td>
+	    <td><span id='read4'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel7" id="namechannel24" type="text" value="Next State" /></td>
+	    <td><input  type="text" id='start5' maxlength="5" size="3" value="13"/>                                            
+        40014</td>
+	    <td><input  type="text" id='number5' maxlength="5" size="3" value="0" /></td>
+	    <td><select name="datatype9" id="datatype5">
+	      <option value="1" >Register Integer</option>
+	      </select></td>
+	    <td><span id='read5'></span></td>
+      </tr>
+	  <tr align="center">
+	    <td bgcolor="#CCCCCC"><strong>CAL DATA</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Register</strong></td>
+	    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+	    <td    bgcolor="#CCCCCC"><strong>Data type</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Read</strong></td>
+    </tr>
+	  <tr align="center">
+	    <td><input  id="namechannel11" type="text" value="CalQ Value"/></td>
+	    <td><input  type="text" id='start6' maxlength="5" size="3" value="47"/>
+	      40048</td>
+	    <td><input  type="text" id='number6' maxlength="5" size="3" value="2"/></td>
+	    <td><select name="datatype2" id="datatype6">
+	      <option value="3" >Float (32 or 64 bits)</option>
+	      </select></td>
+	    <td><span id='read6'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel11" id="namechannel20" type="text"  value="Offset Adc Count"/></td>
+	    <td><input  type="text" id='start7' maxlength="5" size="3" value="71"/>
+	      40072</td>
+	    <td><input  type="text" id='number7' maxlength="5" size="3" value="2"/></td>
+	    <td><select name="datatype13" id="datatype7">
+	      <option value="2" >Long Integer</option>
+	      </select></td>
+	    <td><span id='read7'></span></td>
+      </tr>
+	  <tr align="center" >
+	    <td><input name="namechannel10" id="namechannel19" type="text"  value="Last Cal Date"/></td>
+	    <td><input  type="text" id='start8' maxlength="5" size="3" value="56"/>
+	      40057</td>
+	    <td><input  type="text" id='number8' maxlength="5" size="3" value="2"/></td>
+	    <td><select name="datatype12" id="datatype8">
+	      <option value="2" >Long Integer</option>
+	      </select></td>
+	    <td><span id='read8'></span></td>
+      </tr>
+	  <tr align="center">
+	    <td bgcolor="#CCCCCC"><strong>SIGNALS</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Register</strong></td>
+	    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+	    <td    bgcolor="#CCCCCC"><strong>Data type</strong></td>
+	    <td   bgcolor="#CCCCCC"><strong>Read</strong></td>
+      </tr>
+	  <tr align="center">
+	    <td><input  id="namechannel14" type="text" value="DO mV"/></td>
+	    <td><input  type="text" id='start9' maxlength="5" size="3" value="52"/>
+	      40053</td>
+	    <td><input  type="text" id='number9' maxlength="5" size="3" value="2"/></td>
+	    <td><select name="datatype3" id="datatype9">
+	      <option value="3" >Float (32 or 64 bits)</option>
+	      </select></td>
+	    <td><span id='read9'></span></td>
+      </tr>
+  </table>
+  <p>
+	  <input name="Button2" type="button" onclick="Write()" style="background-color: #CFF" border="2" value="Write Devices" />
+  </p>
+<table  border="0" width="100%" align="center">
+  <tr align="center">
+    <td bgcolor="#CCCCCC"><strong>CONFIGURE</strong></td>
+    <td   bgcolor="#CCCCCC"><strong>Register</strong></td>
+    <td bgcolor="#CCCCCC"><strong>Length</strong></td>
+    <td    bgcolor="#CCCCCC"><strong>Data type</strong></td>
+    <td   bgcolor="#CCCCCC"><strong>Read</strong></td>
+    <td  bgcolor="#CCCCCC"><strong>Write</strong></td>
+    </tr>
+  <tr align="center">
+    <td><input  id="namechannel0" type="text" value="Edit Name"/></td>
+    <td><input  type="text" id='start10' maxlength="5" size="3" value="6"/> 40007</td>
+    <td><input  type="text" id='number10' maxlength="5" size="3" value="6"/></td>
+    <td><select name="datatype0" id="datatype10">
+      <option value="4" >String</option>
+    </select></td>
+    <td><span id='read10'></span></td>
+    <td><input type="text" size="16"  id="write10"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel1" type="text" value="Meas Units" /></td>
+    <td><input  type="text" id='start11' maxlength="5" size="3" value="28"/>40029</td>
+    <td><input  type="text" id='number11' maxlength="5" size="3" value="0" /></td>
+    <td><select name="datatype1" id="datatype11">
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read11'></span>=<span id='tran11'></span></td>
+    <td>
+      <select name="datatype7" id="write11">
+      <option value="0" >mg/l</option>
+        <option value="2" >ppm</option>
+        <option value="10" >percent</option>
+      </select></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel2" type="text"  value="Temp Units"/></td>
+    <td><input  type="text" id='start12' maxlength="5" size="3" value="14"/>
+      40015</td>
+    <td><input  type="text" id='number12' maxlength="5" size="3" value="0"/></td>
+    <td><select name="datatype" id="datatype12">
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read12'></span>=<span id='tran12'></span></td>
+    <td>
+      <select name="datatype6" id="write12">
+        <option value="25" >Celsius oC</option>
+        <option value="26" >Fahrenheit oF</option>
+      </select></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel3" type="text" value="Reject Frequency" /></td>
+    <td><input  type="text" id='start13' maxlength="5" size="3" value="59"/>
+      40060</td>
+    <td><input  type="text" id='number13' maxlength="5" size="3" value="0" /></td>
+    <td><select name="datatype" id="datatype13">
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read13'></span></td>
+    <td><input type="text" size="10"  id="write13"   /></td>
+    </tr>
+  <tr  align="center" >
+    <td><input name="namechannel" id="namechannel4" type="text"  value="Filter"/></td>
+    <td><input  type="text" id='start14' maxlength="5" size="3" value="15"/>40016</td>
+    <td><input  type="text" id='number14' maxlength="5" size="3" value="0"/></td>
+    <td><select name="datatype" id="datatype14">
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read14'></span></td>
+    <td><input type="text" size="10"  id="write14"   /></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel5" type="text" value="Pressure Units" /></td>
+    <td><input  type="text" id='start15' maxlength="5" size="3" value="20"/>40021</td>
+    <td><input  type="text" id='number15' maxlength="5" size="3" value="0" /></td>
+    <td><select name="datatype" id="datatype15" >
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read15'></span>=<span id='tran15'></span></td>
+    <td>
+    <select name="datatype6" id="write15">
+        <option value="45" >mmHg</option>
+        <option value="43" >Feet</option>
+        <option value="13" >Meters</option>
+      </select>
+    </td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel6" type="text" value="Set Pressure" /></td>
+    <td><input  type="text" id='start16' maxlength="5" size="3" value="23"/>40024</td>
+    <td><input  type="text" id='number16' maxlength="5" size="3" value="2"/></td>
+    <td><select name="datatype" id="datatype16">
+      <option value="3" >Float (32 or 64 bits)</option>
+    </select></td>
+    <td><span id='read16'></span></td>
+    <td><input type="text" size="10"  id="write16"   /></td>
+    </tr>
+  <tr align="center">
+    <td><input name="namechannel" id="namechannel7" type="text"  value="Salinity Units"/></td>
+    <td><input  type="text" id='start17' maxlength="5" size="3" value="21"/>40022</td>
+    <td><input  type="text" id='number17' maxlength="5" size="3" value="0" /></td>
+    <td><select name="datatype" id="datatype17">
+      <option value="1" >Register Integer</option>
+      
+    </select></td>
+    <td><span id='read17'></span>=<span id='tran17'></span></td>
+    <td><select name="datatype6" id="write17">
+        <option value="51" >mS/cm</option>
+        <option value="55" >mMol/L</option>
+      </select></td>
+    </tr>
+  <tr align="center" >
+    <td><input name="namechannel" id="namechannel8" type="text" value="Set Salinity" /></td>
+    <td><input  type="text" id='start18' maxlength="5" size="3" value="26"/>40027</td>
+    <td><input  type="text" id='number18' maxlength="5" size="3" value="2"/></td>
+    <td><select name="datatype" id="datatype18">
+      <option value="3" >Float (32 or 64 bits)</option>
+    </select></td>
+    <td><span id='read18'></span></td>
+    <td><input type="text" size="10"  id="write18"   /></td>
+    </tr>
+    <tr align="center" >
+      <td><input name="namechannel" id="namechannel9" type="text" value="Edit Temp Value" /></td>
+      <td><input  type="text" id='start19' maxlength="5" size="3" value="73"/>
+      40074</td>
+      <td><input  type="text" id='number19' maxlength="5" size="3" value="2"/></td>
+      <td><select name="datatype" id="datatype19">
+        <option value="3" >Float (32 or 64 bits)</option>
+        
+      </select></td>
+      <td><span id='read19'></span></td>
+      <td><input type="text" size="10"  id="write19"   /></td>
+    </tr>
+    <tr align="center" >
+      <td><input name="namechannel5" id="namechannel10" type="text" value="Temp Value" /></td>
+      <td><input  type="text" id='start20' maxlength="5" size="3" value="4"/>
+        40005</td>
+      <td><input  type="text" id='number20' maxlength="5" size="3" value="2"/></td>
+      <td><select name="datatype4" id="datatype20">
+                <option value="3" >Float (32 or 64 bits)</option>
+      </select></td>
+      <td><span id='read20'></span></td>
+      <td><input type="text" size="10"  id="write20"   /></td>
+    </tr>
+    <tr align="center" >
+      <td><input name="namechannel5" id="namechannel10" type="text" value="Cal Edit Value" /></td>
+      <td><input  type="text" id='start21' maxlength="5" size="3" value="33"/>
+        40034</td>
+      <td><input  type="text" id='number21' maxlength="5" size="3" value="2"/></td>
+      <td><select name="datatype8" id="datatype21">
+      <option value="3" >Float (32 or 64 bits)</option>
+      </select></td>
+      <td><span id='read21'></span></td>
+      <td><input type="text" size="10"  id="write21"   /></td>
+    </tr>
+      <tr align="center" >
+        <td><input name="namechannel2" id="namechannel12" type="text" value="Output Mode" /></td>
+        <td><input  type="text" id='start22' maxlength="5" size="3" value="29"/>
+          40030</td>
+        <td><input  type="text" id='number22' maxlength="5" size="3" value="0" /></td>
+        <td><select name="datatype22" id="datatype22">
+          <option value="1" >Register Integer</option>
+        </select></td>
+        <td><span id='read22'></span>=<span id='tran22'></span></td>
+        <td><input type="text" size="10"  id="write22"   /></td>
+      </tr>
+      <tr align="center" >
+        <td><input name="namechannel3" id="namechannel9" type="text"  value="Function Code"/></td>
+        <td><input  type="text" id='start23' maxlength="5" size="3" value="12"/>          
+        40013</td>
+        <td><input  type="text" id='number23' maxlength="5" size="3" value="0"/></td>
+        <td><select name="datatype3" id="datatype23">
+          <option value="1" >Register Integer</option>
+        </select></td>
+        <td><span id='read23'></span></td>
+        <td><input type="text" size="10"  id="write23"   /></td>
+      </tr>
+      <tr align="center" >
+        <td><input name="namechannel6" id="namechannel16" type="text"  value="Enter"/></td>
+        <td><input  type="text" id='start24' maxlength="5" size="3" value="9989"/>
+          49990</td>
+        <td><input  type="text" id='number24' maxlength="5" size="3" value="2"/></td>
+        <td><select name="datatype8" id="datatype24">
+          <option value="6" >Long UInteger</option>
+        </select></td>
+        <td><span id='read24'></span></td>
+        <td><input type="text" size="10"  id="write24"   /></td>
+      </tr>
+      <tr align="center" >
+        <td><input name="namechannel8" id="namechannel15" type="text" value="Address Sensor" /></td>
+        <td><input  type="text" id='start25' maxlength="5" size="3" value="9997"/>
+          49998</td>
+        <td><input  type="text" id='number25' maxlength="5" size="3" value="0" /></td>
+        <td><select name="datatype10" id="datatype25">
+          <option value="1" >Register Integer</option>
+        </select></td>
+        <td><span id='read25'></span></td>
+        <td><input type="text" size="10"  id="write25"   /></td>
+      </tr>
+</table>
+
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V316</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
+

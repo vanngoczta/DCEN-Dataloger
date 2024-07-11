@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	function Output(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("Output_iosetting",index, ReceiverStatusOut);
+    }
+	//Tach du lieu ten cac dau vao canh bao
+	function ReceiverStatusOut(macro, args, text)
+	{	
+		if (text != null) 
+		{
+			var fld = text.split(',');
+			if (fld.length >= 1) 
+			{	//alert(fld);
+				for(var i=0;i<6;i++)
+				{
+					var output=(fld.length > i)? fld[i] : "";
+					var indexout=i+1;
+					if(output=='1')
+					{	
+						document.getElementById('out'+i).bgColor="yellow";
+						document.getElementById('out'+i).value="OUTPUT"+indexout+": ON";
+					}
+					else
+					{	
+						document.getElementById('out'+i).bgColor="white";
+						document.getElementById('out'+i).value="OUTPUT"+indexout+": OFF";		
+					}	
+				}
+			}
+		}
+	}
+	//Thuc hien onload
+	function callMacro_Listevents()
+	{
+           // Call the macro
+           webiopi().callMacro("load_iosetting",[], receiverdatas);
+		   Output('10');
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+
+				var disarm=(rcd.length > 0)? rcd[0] : "";
+				if(disarm=='1')
+					document.getElementById('arm').checked=true;
+				else
+					document.getElementById('arm').checked=false;
+				var sms=(rcd.length > 1)? rcd[1] : "";
+				if(sms=='1')
+					document.getElementById('sms').checked=true;
+				else
+					document.getElementById('sms').checked=false;
+					
+				var calibration_status=(rcd.length > 2)? rcd[2] : "";
+				if(calibration_status=='1')
+					document.getElementById('calibration_status').checked=true;
+				else
+					document.getElementById('calibration_status').checked=false;
+				document.getElementById('tinfor').value =(rcd.length > 3)? rcd[3] : "";
+				document.getElementById('tdelay').value =(rcd.length > 4)? rcd[4] : "";
+				document.getElementById('tsiren3').value =(rcd.length > 5)? rcd[5] : "";
+				document.getElementById('tlamp5').value =(rcd.length > 6)? rcd[6] : "";
+				document.getElementById('tonout6').value =(rcd.length > 7)? rcd[7] : "";
+				document.getElementById('tloop12').value =(rcd.length > 8)? rcd[8] : "";
+				var modegen =(rcd.length > 9)? rcd[9] : "";
+				document.getElementById('temphighon12').value =(rcd.length > 10)? rcd[10] : "";
+				document.getElementById('templowoff12').value =(rcd.length > 11)? rcd[11] : "";
+				document.getElementById('humihighon4').value =(rcd.length > 12)? rcd[12] : "";
+				for(var i=0;i<8;i++)
+				{
+					document.getElementById('mode'+i).value= (rcd.length > i*5+13)? rcd[i*5+13] : "";
+					document.getElementById('low'+i).value = (rcd.length > i*5+14)? rcd[i*5+14] : "";
+					document.getElementById('high'+i).value = (rcd.length > i*5+15)? rcd[i*5+15] : "";
+					var get= (rcd.length > i*5+16)? rcd[i*5+16] : "";
+					if(get=='1')
+						document.getElementById('siren'+i).checked=true;
+					else
+						document.getElementById('siren'+i).checked=false; 
+						
+					var modeoutput=(rcd.length > i*5+17)? rcd[i*5+17] : "";
+					if(i<2)
+						document.getElementById('modeout12').value=modeoutput;
+					else
+					{	var indexout=i+1;
+						document.getElementById('modeout'+indexout).value=modeoutput;
+					}
+						
+				}
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+		{	
+			alert("Loadeding...");
+			return;
+		}
+		// Arguments sent to the macro
+		var stringval="";
+		var get='0';
+		if(document.getElementById('arm').checked==true)
+			get='1';
+		else
+			get='0';
+		stringval=stringval+get+';';
+		if(document.getElementById('sms').checked==true)
+			get='1';
+		else
+			get='0';
+		stringval=stringval+get+';';
+		if(document.getElementById('calibration_status').checked==true)
+			get='1';
+		else
+			get='0';
+		stringval=stringval+get+';';
+		stringval=stringval+document.getElementById('tinfor').value+';';
+		stringval=stringval+document.getElementById('tdelay').value+';';
+		stringval=stringval+document.getElementById('tsiren3').value+';';
+		stringval=stringval+document.getElementById('tlamp5').value+';';
+		stringval=stringval+document.getElementById('tonout6').value+';';
+		stringval=stringval+document.getElementById('tloop12').value+';';
+		stringval=stringval+'1;';
+		stringval=stringval+document.getElementById('temphighon12').value+';';
+		stringval=stringval+document.getElementById('templowoff12').value+';';
+		stringval=stringval+document.getElementById('humihighon4').value+';';
+		for(var i=0;i<8;i++)
+		{
+			stringval=stringval+document.getElementById('mode'+i).value+';';
+			stringval=stringval+document.getElementById('low'+i).value+';';
+			stringval=stringval+document.getElementById('high'+i).value+';';
+			if(document.getElementById('siren'+i).checked==true)
+				stringval=stringval+'1;';
+			else
+				stringval=stringval+'0;';
+
+			if(i<2)
+				stringval=stringval+document.getElementById('modeout12').value+';';
+			else
+			{	var indexout=i+1;
+				stringval=stringval+document.getElementById('modeout'+indexout).value+';';
+			}
+			
+		}
+		//Cap nhat thoi gian
+		stringval=stringval+Date();
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_iosetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  dropdown[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var dropdownContent = this.nextElementSibling;
+    if (dropdownContent.style.display === "block") {
+      dropdownContent.style.display = "none";
+    } else {
+      dropdownContent.style.display = "block";
+    }
+  });
+}
+window.onscroll = function() {myFunction()};
+var navbar = document.getElementById("navbar");
+var sticky = navbar.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Listevents();" >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="calibrationsetting.htm">Calibration Setting</a>
+    <a href="functionssetting.htm">Function Setting</a>
+    <a href="modbustcp.htm">Modbus TCP Setting</a>
+    <a class="active" href="iosetting.htm">IO Setting</a>
+    <a href="networksetting.html">Network Setting</a>
+</div>
+<div>
+<p><strong>Input mode:</strong></p>
+		<table width="100%" border="0" align="center">
+		  <tr align="center">
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN1</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN2</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN3</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN4</strong></td>
+	      </tr>
+		  <tr>
+		    <td><select  id="mode0">
+	          	<option value="0">Mở báo động</option>
+		        <option value="1">Đóng báo động</option>
+		        <option value="2">Thay đổi trạng thái</option>
+                <option value="3">Bật/tắt hiệu chuẩn kênh 1</option>
+	          </select>
+              <p><label> Bản tin mở </label></p>
+              <input name="lo0" id="low0" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input name="hi0"  id="high0" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" name="sir0" id="siren0" value="1" />
+	        </td>
+		    <td><select id="mode1">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+              <option value="3">Bật/tắt hiệu chuẩn kênh 2</option>
+	        </select>
+            <p><label> Bản tin mở </label></p>
+              <input name="lo1"  id="low1" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input name="hi0" type="text" id="high1" maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox"  id="siren1" value="1" />
+            </td>
+		    <td><select  id="mode2">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+              <option value="3">Bật/tắt hiệu chuẩn kênh 3</option>
+	        </select>
+            <p><label> Bản tin mở </label></p>
+              <input  id="low2" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input  id="high2" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren2" value="1" /></td>
+		    <td><select id="mode3">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+              <option value="3">Bật/tắt hiệu chuẩn kênh 4</option>
+	        </select>
+            <p><label> Bản tin mở </label></p>
+              <input  id="low3" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input  id="high3" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren3" value="1" />
+                </td>
+	      </tr>
+		  <tr align="center">
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN5</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN6</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN7 (Module mở rộng)</strong></td>
+		    <td width="25%" bgcolor="#CCCCCC"><strong>IN8 (Module mở rộng)</strong></td>
+	      </tr>
+		  <tr>
+		    <td><select id="mode4">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+              <option value="3">Bật/tắt hiệu chuẩn kênh 5</option>
+	        </select>
+            <p><label> Bản tin mở </label></p>
+              <input  id="low4" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input  id="high4" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren4" value="1" /></td>
+		    <td><select id="mode5">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+              <option value="3">Bật/tắt hiệu chuẩn kênh 6</option>
+	        </select>
+            <p><label> Bản tin mở </label></p>
+              <input  id="low5" type="text" maxlength="19" />
+              <p><label> Bản tin đóng </label></p>
+              <input  id="high5" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren5" value="1" /></td>
+		    <td><select id="mode6">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+	        </select>
+            <p>
+              <label> Bản tin ngắt </label>
+              điện
+            </p>
+              <input  id="low6" type="text" maxlength="19" />
+              <p>
+                <label> Bản tin có điện</label></p>
+              <input  id="high6" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren6" value="1" /></td>
+		    <td><select id="mode7">
+		      <option value="0" >Mở báo động</option>
+		      <option value="1" >Đóng báo động</option>
+		      <option value="2" >Thay đổi trạng thái</option>
+	        </select>
+            <p>
+              <label> Bản tin ngắt</label>
+              điện
+            </p>
+              <input  id="low7" type="text" maxlength="19" />
+              <p>
+                <label> Bản tin có điện</label></p>
+              <input  id="high7" type="text"  maxlength="19" />
+    			<label for="checkbox"> Báo động ra loa</label>
+      			<input type="checkbox" id="siren7" value="1" /></td>
+	      </tr>
+</table>
+</div>
+<p><strong>Output mode:</strong></p>
+<table width="100%" border="1">
+  <tr align="center">
+    <td colspan="2" bgcolor="#CCCCCC"><strong>OUT1 &amp; OUT2</strong></td>
+    <td bgcolor="#CCCCCC"><strong>OUT3 (Đầu ra báo động)</strong></td>
+    <td bgcolor="#CCCCCC"><strong>OUT4</strong></td>
+  </tr>
+  <tr>
+    <td colspan="2"><p>Thời gian luân phiên (phút):
+        <input type="number" min="1" id="tloop12" maxlength="4" />
+    </p>
+    <p>Ngưỡng bật cả 2 (so với channel 1):
+      <input type="number" min="0" id="temphighon12" maxlength="3" />
+    </p>
+    <p>Ngưỡng tắt cả 2 (so với channel 1): 
+      <input type="number" min="0" id="templowoff12" maxlength="3" />
+    </p>
+    <p>
+      <select id="modeout12">
+        <option value="0" >Chế độ tự động</option>
+        <option value="1" >Chế độ bằng tay</option>
+      </select>
+      <input type="button" id="out0" onclick="Output('1')" value="OUTPUT1" />
+      <input type="button" id="out1" onclick="Output('2')" value="OUTPUT2" />
+    </p></td>
+    <td><p>Thời gian báo động ra loa (giây):
+        <input  type="number" id="tsiren3"  maxlength="3" />
+    </p>
+    <p>
+      <select id="modeout3">
+        <option value="0" >Chế độ tự động</option>
+        <option value="1" >Chế độ bằng tay</option>
+      </select>
+      <input type="button" id="out2" onclick="Output('3')" value="OUTPUT3" />
+    </p></td>
+    <td><p>Ngưỡng bật (so với channel 2):
+        <input type="number" min="0" max="24" id="humihighon4" maxlength="3" />
+      </p>
+      <p>
+        <select  id="modeout4">
+          <option value="0" >Chế độ tự động</option>
+          <option value="1" >Chế độ luân phiên</option>
+        </select>
+        <input type="button" id="out3" onclick="Output('4')" value="OUTPUT4" />
+      </p></td>
+  </tr>
+  <tr  align="center">
+    <td bgcolor="#CCCCCC"><strong>OUT5</strong></td>
+    <td bgcolor="#CCCCCC"><strong>OUT6 (Điều khiển lấy mẫu)</strong></td>
+    <td bgcolor="#CCCCCC"><strong>OUT7 (Module mở rộng)</strong></td>
+    <td bgcolor="#CCCCCC"><strong>OUT8 (Module mở rộng)</strong></td>
+  </tr>
+  <tr>
+    <td><p>Ngưỡng bật (so với channel 3):
+        <input  type="number" id="tlamp5"  maxlength="3" />
+    </p>
+    <p>
+      <select  id="modeout5">
+        <option value="0" >Chế độ tự động</option>
+        <option value="1" >Chế độ bằng tay</option>
+      </select>
+      <input type="button" id="out4" onclick="Output('5')" value="OUTPUT5" />
+    </p></td>
+    <td><p>Thời gian bật (giây):
+        <input  type="number" id="tonout6"  maxlength="3" />
+      </p>
+      <p>
+        <select  id="modeout6">
+    <option value="0" >Chế độ tự động tắt sau khi bật</option>
+    <option value="1" >Chế độ bằng tay</option>
+  </select>
+        <input type="button" id="out5" onclick="Output('6')" value="OUTPUT6" />
+    </p></td>
+    <td><select id="modeout7">
+        <option value="0" >Chế độ tự động</option>
+        <option value="1" >Chế độ bằng tay</option>
+    </select></td>
+    <td><select  id="modeout8">
+        <option value="0" >Chế độ tự động</option>
+        <option value="1" >Chế độ bằng tay</option>
+    </select></td>
+  </tr>
+</table>
+  	<p><strong>Common Setting :</strong></p>
+    <table width="100%" border="2" align="center">
+          <tr>
+            <td width="50%" bgcolor="#CCCCCC">Bật tắt chế độ báo động</td>
+            <td width="50%"><input  id="arm" type="checkbox"   value="1"  /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Cho phép nhắn tin SMS</td>
+            <td><input  id="sms" type="checkbox"  value="1" /></td>
+          </tr>
+          <tr>
+             <td width="50%" bgcolor="#CCCCCC">Chế độ đang hiệu chuẩn toàn bộ các kênh</td>
+            <td><input  id="calibration_status" type="checkbox"  value="1" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Chu kỳ gửi email và file .csv tới FTP2  (giá trị từ 1 đến 99 giờ, 0 hủy chức năng này)</td>
+            <td><input type="number" min="0" max="24" id="tinfor" maxlength="2" /></td>
+          </tr>
+          <tr>
+            <td bgcolor="#CCCCCC">Thời gian lặp lại báo động ( giá trị từ 1 đến 99 phút, 0 hủy chức năng này)</td>
+            <td><input type="number" min="0" id="tdelay" maxlength="3" /></td>
+          </tr>
+    </table>
+<span id="result"></span> 
+    <p>
+      <input name="Button" type="button" onclick="Savesetting()" value="Save Settings &amp; Update Time" />
+    </p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+<tr>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></div></a></td>
+<td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6DA-V518</font></strong></font></div></td>
+</tr>
+</table>
+</body>
+</html>

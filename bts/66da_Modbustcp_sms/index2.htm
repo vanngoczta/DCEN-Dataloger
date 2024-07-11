@@ -1,0 +1,596 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>ECA-GPIs6.6DA-SMS</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="description" content="ECA-GPIs6.6DA-Functions-SMS DCEN.VN">
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+	var flagbg=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var flag=0;
+	var audio = new Audio('ALARM.mp3');
+	webiopi().ready(function() 
+	{	
+	});
+	// Following function will process data received from 
+	// Dieu khien loi ra 1
+	function Output(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("Output",index, ReceiverStatusInOut);
+    }
+	function ModeOutput(index)
+	{   	
+        // Call the macro
+        webiopi().callMacro("ModeOutput", index, ReceiverStatusInOut);
+    }
+	//Tach du lieu ten cac dau vao canh bao
+	function ReceiverStatusInOut(macro, args, text)
+	{	
+		if (text != null) 
+		{
+			var rcd = text.split('\r\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					if (rcd[i].trim() != "") 
+					{	
+						var fld = rcd[i].split(',');
+						if (fld.length >= 1) 
+						{	//alert(fld.length);
+							var meslow=(fld.length > 0)? fld[0] : "";
+							var meshigh=(fld.length > 1)? fld[1] : "";
+							var input=(fld.length > 2)? fld[2] : "";
+							var output=(fld.length > 3)? fld[3] : "";
+							var modeoutput=(fld.length > 4)? fld[4] : "";
+							//document.getElementById('low'+i).innerHTML=meslow;
+							//document.getElementById('high'+i).innerHTML=meshigh;
+							if(input=='1')
+							{	document.getElementById('tdinput'+i).style.color="black";
+								document.getElementById('input'+i).innerHTML=meshigh;
+							}
+							else
+							{	document.getElementById('tdinput'+i).style.color="gray";
+								document.getElementById('input'+i).innerHTML=meslow;
+							}
+							if(output=='1')
+							{	
+								
+								if(i==2)
+								{
+									document.getElementById('out'+i).style.color="red";	
+									audio.play();
+								}
+								else
+									document.getElementById('out'+i).style.color="black";
+							}
+							else
+							{	
+								document.getElementById('out'+i).style.color="gray";
+								if(i==2)
+								{	
+									audio.pause();
+								}
+							}
+							if(modeoutput=='1')
+							{	
+								if(i==3)
+								{	
+									document.getElementById('modeout'+i).innerHTML='Luân phiên';
+									document.getElementById('out'+i).value="Điều hòa 3"
+								}
+								else
+									document.getElementById('modeout'+i).innerHTML='Bằng tay';
+								document.getElementById('modeout'+i).style.color="black";
+							}
+							else
+							{	
+								if(i==0 || i==1)
+									document.getElementById('modeout'+i).innerHTML='Luân phiên';
+								else
+									document.getElementById('modeout'+i).innerHTML='Tự động';
+								document.getElementById('modeout'+i).style.color="gray";
+							}			
+						}
+					}
+				}		
+			}
+		}
+		return true;
+	}
+	setInterval ("callMacro_UpdateMonitor()", 1000);
+	{}
+  	function callMacro_UpdateMonitor()
+    {
+       // Get data from macro
+       if(flag==0)
+	   {	flag=1;
+	   		webiopi().callMacro("UpdateMonitor", [], ReceiverUpdateMonitor);
+			webiopi().callMacro("InOutStatus",[], ReceiverStatusInOut);
+	   }
+	   else if(flag==1)
+	   {	flag=0;
+	   		webiopi().callMacro("load_alarm_tablet_index",[], receiveralarms);
+			webiopi().callMacro("UpdateStatus",[], receiverUpdateStatus);
+	   } 
+	}
+	//------------------------------------------------------------
+	function receiverUpdateStatus(macro, args, response) 
+	{
+		var rcd = response.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	
+						
+						document.getElementById('namestation').innerHTML=(fld.length > 0)? fld[0] : "";
+						document.getElementById('datetime').innerHTML=(fld.length > 1)? fld[1] : "";
+						alarmstatus=(fld.length > 2)? fld[2] : "";
+						if(alarmstatus=="ARMED")
+							document.getElementById('alarmstation').innerHTML="BẬT";
+						else if(alarmstatus=="DISARM")
+							document.getElementById('alarmstation').innerHTML="TẮT";
+						document.getElementById('reportgsm').innerHTML=(fld.length > 3)? fld[3] : "";
+						document.getElementById('reportserver').innerHTML=(fld.length > 4)? fld[4] : "";
+						document.getElementById('reporthmi').innerHTML=(fld.length > 5)? fld[5] : "";
+						var homemode=(fld.length > 6)? fld[6] : "";
+						//if(homemode=='1')
+						//	document.getElementById('homemode').style.display="none";
+						//document.getElementById('timer').innerHTML=Date();
+					}
+				}
+			}
+		}
+	}
+	//------------------------------------------------------------
+	// Following function will process data received from set/getLightHours macro.
+	
+    function receiveralarms(macro, args, response) 
+	{
+            // Following lines use jQuery functions
+			AlarmDataTable(response);
+    }
+	function ReceiverUpdateMonitor(macro, args, response) 
+	{
+            // Following lines use jQuery functions
+			var dataTable = document.getElementById('data_table_div');
+			populateDataTable(response, dataTable);
+			//resizeTable();
+    }
+	//Thuc hien onload
+	function callMacro_Listalarms()
+	{
+           // Call the macro
+           webiopi().callMacro("load_alarm_data",[], receiveralarms);
+    }
+	//------------------------------------------------------------
+    // convenience: wrap value in specified font
+    function setFont(val, face, size) {
+        var s = "<font color=\"#FFFFFF\"";
+        s += " face='" + face + "'";
+        s += "size=" + size;
+        s += ">";
+        s += val;
+        s += "</font>";
+        return s;
+    }
+    
+    // convenience: set header font
+    function hdrFont(val) {
+       return "<center><b>" + setFont(val, "arial", 2) + "</b></center>";
+    }
+    
+    // convenience: set data font
+    function dtaFont(val) {
+       return "<center><font size='2' face=\"arial\">" + val + "</font></center>";
+    }
+		function getWindowHeight() {
+        var winHeight = 0;
+        if (typeof(window.innerWidth) == 'number') {
+            // Non-IE
+            winHeight = window.innerHeight; // innerWidth
+        } else 
+        if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+            // IE 6+ in 'standards compliant mode'
+            winHeight = document.documentElement.clientHeight; // clientWidth
+        } else 
+        if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+            //IE 4 compatible
+            winHeight = document.body.clientHeight; // clientWidth
+        }
+        //window.alert( 'Height = ' + winHeight);
+        return winHeight;
+    }
+	// return the absolute Y offset of an object (relative to page
+    function getAbsoluteOffsetTop(obj) {
+        var absTop = 0;
+        if (obj.offsetParent) {
+            for (; obj.offsetParent; obj = obj.offsetParent) {
+                absTop += obj.offsetTop;
+            }
+        } else
+        if (obj.y) {
+            absTop += obj.y;
+        }
+        return absTop;
+    }
+	 // on resize
+    function resizeTable() {
+        var dataTableDiv = document.getElementById('data_table_div');
+        var last_hr      = document.getElementById('last_hr');
+        var winHeight    = getWindowHeight();
+        var dataHeight   = (winHeight - last_hr.clientHeight) - getAbsoluteOffsetTop(dataTableDiv) - 20;
+        //alert("Table height: [" + getAbsoluteOffsetTop(dataTableDiv) + "] " + dataHeight);
+        if (dataHeight > 20) {
+            dataTableDiv.style.height = dataHeight + "px";
+        } else {
+            dataTableDiv.style.height = "auto";
+        }
+    }
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function AlarmDataTable(text)
+{	
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+						var id			= 	(fld.length > 0)? fld[0] : "";
+						var date		= 	(fld.length > 1)? fld[1] : "";
+						var time  		= 	(fld.length > 2)? fld[2] : "";
+						var eventalarm	= 	(fld.length > 3)? fld[3] : "";
+						document.getElementById('id'+i).innerHTML=id;
+						document.getElementById('date'+i).innerHTML=date;
+						document.getElementById('time'+i).innerHTML=time.slice(0,5);
+						document.getElementById('event'+i).innerHTML=eventalarm;			
+					}
+				}
+			}		
+		}
+	}
+	return true;
+}
+// Chay file am thanh
+function playSound(el,soundfile) 
+{
+	if (el.mp3) 
+	{
+		if(el.mp3.paused) 
+			el.mp3.play();
+        else 
+			el.mp3.pause();
+    } else {
+        el.mp3 = new Audio(soundfile);
+        el.mp3.play();
+    }
+}
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function populateDataTable(text, dataTable)
+{	// the following limits the number of 'pushPins' placed on the map to the last MAX_PUSH_PINS points.
+	var MAX_PUSH_PINS = 40; // arbitrary limit
+	if (text != null) 
+	{
+		var rcd = text.split('\r\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			var ndx = 0;
+			var tableData = "";
+			// Time | channel | namechannel | value | unit | status | Input | Output
+			tableData += "<table id='data_table' width='100%' cellspacing=\"0\" cellpadding=\"0\" border=\"1\">\n";
+			tableData += "<thead><tr bgcolor=\"#0000CC\">";
+			tableData +=  "<th scope=\"col\">"+hdrFont("Time")+"</th>";
+			tableData +=  "<th scope=\"col\">"+hdrFont("Channel")+"</th>";
+			tableData +=  "<th scope=\"col\">"+hdrFont("Name")+"</th>";
+    		tableData +=  "<th scope=\"col\">"+hdrFont("Value")+"</th>";
+			tableData +=  "<th scope=\"col\">"+hdrFont("Unit")+"</th>";
+    		tableData +=  "<th scope=\"col\">"+hdrFont("Status")+"</th>";
+            tableData += "</tr></thead>\n";
+			tableData += "<tbody id='data_tbody'>\n";
+			for (var i = 0; i < rcd.length; i++) 
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+						var time		  = 	(fld.length > 0)? fld[0] : "";
+						var channel		=  (fld.length > 1)? fld[1] : "";
+						var name 		 = 	(fld.length > 2)? fld[2] : "";
+						var value  		= 	(fld.length > 3)? fld[3] : "";
+						var units  		= 	(fld.length > 4)? fld[4] : "";
+						var status  		= 	(fld.length > 5)? fld[5] : "";
+						var strstatus="";
+						if(status==0)
+						{	strstatus="Not connect";
+							tableData += "<tr bgColor=\"gray\">\n";
+						}
+						else if(status==1)
+						{
+							strstatus="Connected";
+							tableData += "<tr bgColor=\"white\">\n";
+						}
+						else if(status==2)
+						{	
+							strstatus="Low Alarm";
+							if(flagbg[i]==0)
+							{
+								tableData += "<tr bgColor=\"yellow\">\n";
+								flagbg[i]=1;
+							}
+							else
+							{
+								tableData += "<tr bgColor=\"white\">\n";
+								flagbg[i]=0;
+							}
+						}
+						else if(status==3)
+						{	
+							strstatus="High Alarm";
+							if(flagbg[i]==0)
+							{
+								tableData += "<tr bgColor=\"red\">\n";
+								flagbg[i]=1;
+							}
+							else
+							{
+								tableData += "<tr bgColor=\"white\">\n";
+								flagbg[i]=0;
+							}
+						}
+						tableData += "<td>" + dtaFont(time) + "</td>";
+						tableData += "<td>" +dtaFont(channel) + "</td>";
+						tableData += "<td><strong>" +dtaFont(name) + "</strong></td>";
+						tableData += "<td>" +dtaFont( value) + "</td>";
+						tableData += "<td>" +dtaFont(units) + "</td>";
+						tableData += "<td>" + dtaFont(strstatus) + "</td>";
+						tableData += "</tr>\n";
+							
+					}
+				}
+			}
+			tableData += "</tbody>\n";
+			tableData += "</table>\n";
+			dataTable.innerHTML = tableData;
+			
+		}
+		else 
+			{
+              	dataTable.innerHTML = "(No data) " + text;
+          	}
+	}
+	else 
+	  		{
+          		dataTable.innerHTML = "Null data";
+       		}
+	//alert(Liststation);
+	return true;
+}
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  dropdown[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var dropdownContent = this.nextElementSibling;
+    if (dropdownContent.style.display === "block") {
+      dropdownContent.style.display = "none";
+    } else {
+      dropdownContent.style.display = "block";
+    }
+  });
+}
+window.onscroll = function() {myFunction()};
+var navbar = document.getElementById("navbar");
+var sticky = navbar.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
+  }
+}
+</script>
+<body >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a class="active" href="index2.htm">Home Full</a>
+    <a href="historytrend.htm">History Trend</a>
+    <a href="historydata.htm">History Data</a>
+    <a href="alarmdata.htm">Data Alarm</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="LinearRegression.html">Linear Regression</a>
+</div>
+<font color="#3498DB" face="arial" size="3"><strong><span id='namestation'></span></strong></font> 
+<font color="#3498DB" face="arial" size="1"><span id='datetime'></span></font> 
+<table cellspacing="0" width="100%" cellpadding="0" border="1">
+  <tr bgcolor="#0000CC">
+    <td><center>
+      <b><font color="#FFFFFF" face="arial" size="2">Báo động</font></b>
+    </center></td>
+    <td><center>
+      <b><font color="#FFFFFF" face="arial" size="2">Kết nối GSM</font></b>
+    </center></td>
+    <td><center>
+      <b><font color="#FFFFFF" face="arial" size="2">Kết nối LAN/WAN</font></b>
+    </center></td>
+    <td><center>
+      <b><font color="#FFFFFF" face="arial" size="2">Kết nối HMI và Modbus</font></b>
+    </center></td>
+  </tr>
+  <tr>
+    <td align="center"><span id='alarmstation'></span></td>
+    <td align="center"><span id='reportgsm'></span></td>
+    <td align="center"><span id='reportserver'></span></td>
+    <td align="center"><span id='reporthmi'></span></td>
+  </tr>
+</table>
+<table width="100%" border="1">
+  <tr>
+    <td width="50%"><table width="100%" border="1">
+      <tr>
+        <td bgcolor="#0000CC"  width="5%" ><center>
+          <b><font color="#FFFFFF" face="arial" size="2">ID</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Đầu vào cảm biến</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Điều khiển</font></b>
+        </center></td>
+        <td bgcolor="#0000CC" ><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Chế độ</font></b>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          1
+        </center></td>
+        <td align="center" id='tdinput0'><center>
+          <span id='input0'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out0" value="Out1 ĐK bơm 1" onclick="Output('1')" /></td>
+        <td align="center" id='modeout0' onclick="ModeOutput('1')"></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          2
+        </center></td>
+        <td align="center" id='tdinput1'><center>
+          <span id='input1'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out1" value="Out2 ĐK bơm 2" onclick="Output('2')" /></td>
+        <td align="center" id='modeout1' onclick="ModeOutput('2')"></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          3
+        </center></td>
+        <td align="center" id='tdinput2'><center>
+          <span id='input2'></span>
+        </center></td>
+        <td align="center" ><input type="button" id="out2" value="Out3 Đèn báo động" onclick="Output('3')" /></td>
+        <td align="center" id='modeout2' onclick="ModeOutput('3')"></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          4
+        </center></td>
+        <td align="center" id='tdinput3'><center>
+          <span id='input3'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out3" value="Output 4" onclick="Output('4')" /></td>
+        <td align="center" id='modeout3' onclick="ModeOutput('4')"></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          5
+        </center></td>
+        <td align="center" id='tdinput4'><center>
+          <span id='input4'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out4" value="Output 5" onclick="Output('5')" /></td>
+        <td align="center" id='modeout4' onclick="ModeOutput('5')"></td>
+        </tr>
+      <tr>
+        <td align="center"><center>
+          6
+        </center></td>
+        <td align="center" id='tdinput5'><center>
+          <span id='input5'></span>
+        </center></td>
+        <td align="center" ><input type="button"  id="out5" value="Out6 ĐK lấy mẫu" onclick="Output('6')" /></td>
+        <td align="center" id='modeout5' onclick="ModeOutput('6')"></td>
+        </tr>
+    </table>
+    <table width="100%" border="1">
+      <tr>
+        <td bgcolor="#0000CC" width="5%"><center>
+          <b><font color="#FFFFFF" face="arial" size="2">ID</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Ngày</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Giờ</font></b>
+        </center></td>
+        <td bgcolor="#0000CC"><center>
+          <b><font color="#FFFFFF" size="2" face="arial">Sự kiện cảnh báo</font></b>
+        </center></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id0'></span></td>
+        <td align="center"><span id='date0'></span></td>
+        <td align="center"><span id='time0'></span></td>
+        <td align="center"><span id='event0'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id1'></span></td>
+        <td align="center"><span id='date1'></span></td>
+        <td align="center"><span id='time1'></span></td>
+        <td align="center"><span id='event1'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id2'></span></td>
+        <td align="center"><span id='date2'></span></td>
+        <td align="center"><span id='time2'></span></td>
+        <td align="center"><span id='event2'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id3'></span></td>
+        <td align="center"><span id='date3'></span></td>
+        <td align="center"><span id='time3'></span></td>
+        <td align="center"><span id='event3'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id4'></span></td>
+        <td align="center"><span id='date4'></span></td>
+        <td align="center"><span id='time4'></span></td>
+        <td align="center"><span id='event4'></span></td>
+        </tr>
+      <tr>
+        <td align="center"><span id='id5'></span></td>
+        <td align="center"><span id='date5'></span></td>
+        <td align="center"><span id='time5'></span></td>
+        <td align="center"><span id='event5'></span></td>
+        </tr>
+    </table></td>
+    <td width="50%">
+<div id='data_table_div'></div>
+</td>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0">
+    <div align="left"><a href="http://dcen.vn"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></a></div>
+      </td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC"><a href="upload/HDSD_ECA-GPIs6.6DA2(Vis).pdf">ECA-GPIs6.6DA-FTP1018</a></font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

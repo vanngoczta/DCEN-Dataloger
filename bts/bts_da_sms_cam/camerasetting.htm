@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Setting ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<link rel="stylesheet" type="text/css" href="dataonline.css">
+<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+</head>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script type="text/javascript">
+var Flag=0;
+var Liststation="";
+	webiopi().ready(function() 
+	{	
+		// Following function will process data received from set/getLightHours macro.
+	});
+	//Thuc hien onload
+	function callMacro_Loadsetting()
+	{
+           // Call the macro
+           webiopi().callMacro("load_cameraipsetting",[], receiverdatas);
+		   Flag=0;
+    }
+	function receiverdatas(macro, args, response) 
+	{	
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			if (rcd.length >= 1) 
+			{
+				document.getElementById('ipc0').value =(rcd.length > 0)? rcd[0] : "";
+				document.getElementById('portc0').value=(rcd.length > 1)? rcd[1] : "";
+				document.getElementById('urlc0').value=(rcd.length > 2)? rcd[2] : "";
+				document.getElementById('userc0').value = (rcd.length > 3)? rcd[3] : "";
+				document.getElementById('passc0').value = (rcd.length > 4)? rcd[4] : "";
+				document.getElementById('modec0').value = (rcd.length > 5)? rcd[5] : "";
+				document.getElementById('ipc1').value =(rcd.length > 6)? rcd[6] : "";
+				document.getElementById('portc1').value=(rcd.length > 7)? rcd[7] : "";
+				document.getElementById('urlc1').value=(rcd.length > 8)? rcd[8] : "";
+				document.getElementById('userc1').value = (rcd.length > 9)? rcd[9] : "";
+				document.getElementById('passc1').value = (rcd.length > 10)? rcd[10] : "";
+				document.getElementById('modec1').value = (rcd.length > 11)? rcd[11] : "";
+				
+				if(Flag==1)
+					document.getElementById('result').innerHTML="Saved Setting";
+				else
+				{	
+					Flag=2;
+					document.getElementById('result').innerHTML="Loaded Setting";
+				}
+			}
+		}
+    }
+	//Liet ke su kien lien quan den channel, ngay thang
+	function Savesetting()
+	{
+		if(Flag<2)
+			return;
+		// Arguments sent to the macro
+		var stringval="";
+		stringval=stringval+document.getElementById('ipc0').value+';';
+		stringval=stringval+document.getElementById('portc0').value+';';
+		var pathurl=document.getElementById('urlc0').value;
+		var re=new RegExp('/', 'g');
+		var pathremove=pathurl.replace(re,':');
+		stringval=stringval+pathremove+';';
+		stringval=stringval+document.getElementById('userc0').value+';';
+		var passcam =document.getElementById('passc0').value;
+		var re=new RegExp('#', 'g');
+		var passreplace=passcam.replace(re,'~');
+		stringval=stringval+passreplace+';';
+		stringval=stringval+document.getElementById('modec0').value+';';
+		
+		stringval=stringval+document.getElementById('ipc1').value+';';
+		stringval=stringval+document.getElementById('portc1').value+';';
+		var pathurl=document.getElementById('urlc1').value;
+		var re=new RegExp('/', 'g');
+		var pathremove=pathurl.replace(re,':');
+		stringval=stringval+pathremove+';';
+		stringval=stringval+document.getElementById('userc1').value+';';
+		var passcam =document.getElementById('passc1').value;
+		var re=new RegExp('#', 'g');
+		var passreplace=passcam.replace(re,'~');
+		stringval=stringval+passreplace+';';
+		stringval=stringval+document.getElementById('modec1').value+';';
+		alert(stringval);
+        // Call the macro
+        webiopi().callMacro("save_cameraipsetting",stringval, receiverdatas);
+		document.getElementById('result').innerHTML="Saving...";
+		Flag=1;
+	}
+
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  dropdown[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var dropdownContent = this.nextElementSibling;
+    if (dropdownContent.style.display === "block") {
+      dropdownContent.style.display = "none";
+    } else {
+      dropdownContent.style.display = "block";
+    }
+  });
+}
+window.onscroll = function() {myFunction()};
+var navbar = document.getElementById("navbar");
+var sticky = navbar.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
+  }
+}
+</script>
+<body bgcolor="white" onload="callMacro_Loadsetting();" >
+<div id="navbar">
+    <a href="index.htm">Home</a>
+    <a href="modbussetting.htm">Modbus RTU Setting</a>
+    <a href="calibrationsetting.htm">Calibration Setting</a>
+    <a href="functionssetting.htm">Function Setting</a>
+    <a href="modbustcp.htm">Modbus TCP Setting</a>
+    <a href="iosetting.htm">IO Setting</a>
+    <a class="active" href="camerasetting.htm">Camera IP Setting</a>
+    <a href="networksetting.html">Network Setting</a>
+  </div>
+<p><strong>Camera 1:</strong></p>
+  <table width="100%" border="2" align="center">
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>IP Address Cam1:</label>
+        </font></strong></td>
+        <td><input type="text" name="ipc0" id="ipc0" size="40"/></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>Port Cam1:</label>
+        </font></strong></td>
+        <td><input type="text" name="portc0" id="portc0" size="8"/></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>Url Snapshot Cam1:</label>
+        </font></strong></td>
+        <td><input type="text" name="urlc0" id="urlc0" size="40"/></td>
+      </tr>
+      <tr>
+        <td bgcolor="#993300"><strong><font color="#FFFFFF">
+          <label>User Cam1:</label>
+        </font></strong></td>
+        <td><input type="text" name="userc0" id="userc0" /></td>
+      </tr>
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>Password Cam1:</label>
+      </font></strong></td>
+      <td ><input name="passc0" type="password" id="passc0" /></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>Mode Alarm Cam1:</strong></font></td>
+      <td><select name="modec0"  id="modec0">
+        <option value="0">Not use</option>
+        <option value="1">Alarm IN1..6</option>
+        <option value="2">Alarm Channels</option>
+        <option value="3">Alarm IN1...6 &amp;&amp; Channels</option>
+      </select></td>
+    </tr>
+  </table>
+  <p><strong>Camera 2: </strong></p>
+<table width="100%" border="2">
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>IP Address Cam2:</label>
+      </font></strong></td>
+      <td><input type="text" name="ipc1" id="ipc1" size="40"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>Port Cam2:</label>
+      </font></strong></td>
+      <td><input type="text" name="portc1" id="portc1" size="8"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>Url Snapshot Cam2:</label>
+      </font></strong></td>
+      <td><input type="text" name="urlc1" id="urlc1" size="40"/></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>User Cam2:</label>
+      </font></strong></td>
+      <td><input type="text" name="userc1" id="userc1" /></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><strong><font color="#FFFFFF">
+        <label>Password Cam2:</label>
+      </font></strong></td>
+      <td><input name="passc1" type="password" id="passc1" /></td>
+    </tr>
+    <tr>
+      <td bgcolor="#993300"><font color="#FFFFFF"><strong>Mode Alarm Cam2:</strong></font></td>
+      <td><select name="modec1"  id="modec1">
+        <option value="0">Not use</option>
+        <option value="1">Alarm IN1..6</option>
+        <option value="2">Alarm Channels</option>
+        <option value="3">Alarm IN1...6 &amp;&amp; Channels</option>
+      </select></td>
+    </tr>
+  </table>
+  <table width="100%" border="0">
+    <tr>
+      <td align="center"><a href="cam1.jpg" target="_blank"><p>Picture Camera 1</p><img src="cam1.jpg" alt=""  width="70%" id="image0" /></a></td>
+      <td align="center"><a href="cam2.jpg" target="_blank"><p>Picture Camera 2</p><img src="cam2.jpg" alt=""  width="70%" id="image1" /></a></td>
+    </tr>
+</table>
+    <p>
+    <span id="result">Loading...</span> </p>
+    <p>
+  <input name="Button1" type="button" onclick="Savesetting()" value="Save Settings" />	 
+    </p>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2018 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-FTP-V618</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>

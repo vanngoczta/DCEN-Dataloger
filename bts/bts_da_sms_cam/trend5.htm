@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Trend ECA-GPIs6.6CE</title>
+<link rel="icon" href="favicon1.png" type="image/gif" sizes="16x16">
+<style type="text/css">
+body {
+	background-color: #CCC;
+	background-image: url(backgro.jpg);
+}
+p.pos_fixed {
+    position: fixed;
+    top: 30px;
+    right: 5px;
+    color: red;
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 4px;
+}
+</style>
+</head>
+<script src="Highcharts-4.0.4/js/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/webiopi.js"></script>
+<script language="JavaScript">
+	webiopi().ready(function() 
+	{	
+	});
+	//Thuc hien onload
+	function receiverdatas(macro, args, response) 
+	{
+		var dataTable = document.getElementById('data_table_div');
+		var result=populateDataTable(response, dataTable);
+		resizeTable();
+		//listnamechannel();
+		ChartDisplay();
+    }
+	//Liet ke su kien lien quan ngay va kenh
+	function ListChannelDays()
+	{
+		 // Arguments sent to the macro
+         var index = [$("#channel").val(),$("#days").val()];
+         // Call the macro
+         webiopi().callMacro("load_history_days_channel", index, receiverdatas);
+	}
+	function LoadData()
+	{
+		if(document.getElementById('startdate').value||document.getElementById('enddate').value)
+			ListChannelDate();
+		else
+			ListChannelDays();
+	}
+	//setInterval(LoadData,20000);
+		//Liet ke su kien lien quan ngay va kenh
+	function ListChannelDate()
+	{
+		 // Arguments sent to the macro
+         var index = [$("#channel").val(),$("#startdate").val(),$("#enddate").val()];
+         // Call the macro
+         webiopi().callMacro("load_history_date_channel", index, receiverdatas);
+	}
+	//Macro liet ke ten du lieu
+	function listnamechannel()
+	{
+		webiopi().callMacro("Listnamechannel",[], receivernamechannel);
+		document.getElementById('channel').value='5';
+		LoadData();
+		
+	}
+	//Liet ke ten cua cac kenh du lieu
+	function receivernamechannel(macro, args, response) 
+	{
+		if (response != null) 
+		{
+			var rcd = response.split('\n');
+			//alert(rcd);
+			if (rcd.length >= 1) 
+			{	
+				for (var i = 0; i < rcd.length; i++) 
+				{
+					var data='idchannel'+i;
+					var idchannel = (rcd.length > i)? rcd[i] : "";
+					if(document.getElementById(data))
+						document.getElementById(data).innerHTML=idchannel;
+					
+				}
+			}
+		}
+	}
+//------------------------------------------------------------
+function getWindowHeight() {
+       var winHeight = 0;
+       if (typeof(window.innerWidth) == 'number') {
+           // Non-IE
+           winHeight = window.innerHeight; // innerWidth
+       } else 
+       if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+         // IE 6+ in 'standards compliant mode'
+        winHeight = document.documentElement.clientHeight; // clientWidth
+        } else 
+        if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+            //IE 4 compatible
+            winHeight = document.body.clientHeight; // clientWidth
+        }
+        //window.alert( 'Height = ' + winHeight);
+        return winHeight;
+}
+// return the absolute Y offset of an object (relative to page
+function getAbsoluteOffsetTop(obj) {
+       var absTop = 0;
+       if (obj.offsetParent) {
+           for (; obj.offsetParent; obj = obj.offsetParent) {
+               absTop += obj.offsetTop;
+           }
+       } else
+       if (obj.y) {
+           absTop += obj.y;
+       }
+       return absTop;
+}
+// on resize
+function resizeTable() {
+        var dataTableDiv = document.getElementById('data_table_div');
+        var last_hr      = document.getElementById('last_hr');
+        var winHeight    = getWindowHeight();
+        var dataHeight   = (winHeight - last_hr.clientHeight) - getAbsoluteOffsetTop(dataTableDiv) - 1;
+        //alert("Table height: [" + getAbsoluteOffsetTop(dataTableDiv) + "] " + dataHeight);
+        if (dataHeight > 1) {
+            dataTableDiv.style.height = dataHeight + "px";
+        } else {
+            dataTableDiv.style.height = "auto";
+        }
+}
+// add 'trim()' function to String
+String.prototype.trim = function() { return this.replace(/^\s+/,'').replace(/\s+$/,''); }
+//Tach du lieu cua cac val thanh cac chuoi rieng biet	
+function populateDataTable(text, dataTable)
+{	// the following limits the number of 'pushPins' placed on the map to the last MAX_PUSH_PINS points.
+	var MAX_PUSH_PINS = 40; // arbitrary limit
+	
+	if (text != null) 
+	{
+		var rcd = text.split('\n');
+		//alert(rcd);
+		if (rcd.length >= 1) 
+		{
+			var ndx = 0;
+			var tableData = "";
+			var x = document.getElementById("channel").selectedIndex;
+    		var y = document.getElementById("channel").options;
+			tableData += "<table id='datatable'>\n";
+			tableData += "<thead><tr>";
+			tableData += "<th>HH:MM</th>";
+			tableData += "<th>" +y[x].text+ "</th>";
+            tableData += "</tr></thead>\n";
+			tableData += "<tbody>\n";
+			totalevent=0;
+			var valuearray=[];
+			//for (var i = 0; i < rcd.length-1; i++) 
+			for (var i = rcd.length-1 ; i >= 0 ; i--)
+			{
+				if (rcd[i].trim() != "") 
+				{	
+					var fld = rcd[i].split(',');
+					if (fld.length >= 1) 
+					{	//alert(fld.length);
+						var time = 		(fld.length > 0)? fld[0] : "";
+						var value  = 	(fld.length > 1)? fld[1] : "";
+						valuearray[i]=value;
+						tableData += "<tr>";
+						tableData += "<td>" + time + "</td>";
+						tableData += "<td>"+ value + "</td>";
+						tableData += "</tr>\n";
+						totalevent=totalevent+1;	
+					}
+				}
+			}
+			tableData += "</tbody>\n";
+			tableData += "</table>\n";
+			dataTable.innerHTML = tableData;
+			maxvalue=Math.max.apply(null,valuearray);
+			minvalue=Math.min.apply(null,valuearray);
+			averagefloat=(maxvalue+minvalue)/2;
+			averagevalue=Math.round(averagefloat * 100) / 100;
+		}
+		else 
+			{
+              	dataTable.innerHTML = "(No data) " + text;
+          	}
+	}
+	else 
+	  		{
+          		dataTable.innerHTML = "Null data";
+       		}
+
+	return true;
+}
+//---------------------Get Excel--------------------------------------
+function tabletoExcel(table, name) {
+    var uri = 'data:application/vnd.ms-excel;base64,'
+          , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+          , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))); }
+          , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }); };
+        if (!table.nodeType) table = document.getElementById(table);
+        var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+        window.location.href = uri + base64(format(template, ctx));
+
+}
+</script>
+<script language="JavaScript">
+function ChartDisplay() {
+
+	//$(document).ready(function(){
+ 	//$("#displaychart").click(function(){
+	//alert(document.getElementById('datatable').innerHTML);
+	var chart = new Highcharts.Chart({
+	    chart: {
+			renderTo: 'container',
+            type: 'line',
+			zoomType: 'x'
+        },
+  		data: {
+            table: document.getElementById('datatable')
+        },
+        title: {
+            text: 'Data from ECA-GPIs6.6CE: ' + totalevent +" events "+  '   Min: ' + minvalue + '   Max: ' + maxvalue + ' Average: ' + averagevalue
+        },
+        yAxis: {
+            allowDecimals: true,
+            title: {
+                text: 'Units'
+            }
+        },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '</b><br/>' +
+                    this.point.y + ' ' + this.point.name.toLowerCase();
+            }
+        }
+    });
+}
+</script>
+<script src="Highcharts-4.0.4/js/highcharts.js"></script>
+<script src="Highcharts-4.0.4/js/modules/data.js"></script>
+<script src="Highcharts-4.0.4/js/modules/exporting.js"></script>
+<body bgcolor="white" onload="listnamechannel()" >
+<table border="0" width="100%"  ">
+  <tr>
+    <td  align="center" valign="middle"><div align="center"><a href="index.htm" style="text-decoration:none"><font size="4"><strong>Home</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historytrend.htm" style="text-decoration:none"><font size="4"><strong>Display Trend</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="historydata.htm" style="text-decoration:none"><font size="4"><strong>Data Table</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="alarmdata.htm" style="text-decoration:none"><font size="4"><strong>Data Alarm</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="iosetting.htm" style="text-decoration:none"><font size="4"><strong>IO Setting</strong></font></a></div></td>
+    <td  align="center" valign="middle"><div align="center"><a href="networksetting.html" style="text-decoration:none"><font size="4"><strong>Network Setting</strong></font></a></div></td>
+  </tr>
+</table>
+
+  <div> <a href="JavaScript:window.print()"><img src="print.gif" border="0" /></a> <img src="download_icon.gif" onclick="tabletoExcel('data_table_div','Datalog')" border="0" /> </div>
+  <table width="100%" border="1">
+    <tr bgcolor="#0000CC" bordercolor="#ECE9D8">
+      <th><font color="#FFFF00"><strong>Channel</strong></font></th>
+      <th><font color="#FFFF00"><strong>Days</strong></font></th>
+      <th><strong><font color="#FFFF00">Start Date - End Date (YYYY-MM-DD)</font></strong></th>
+      </tr>
+    <tr align="center">
+      <th scope="row">
+      <select name="channel" id="channel">
+      <option value="0" id="idchannel0"></option>
+      <option value="1" id="idchannel1"></option>
+      <option value="2" id="idchannel2"></option>
+      <option value="3" id="idchannel3"></option>
+      <option value="4" id="idchannel4"></option>
+      <option value="5" id="idchannel5"></option>
+      <option value="6" id="idchannel6"></option>
+      <option value="7" id="idchannel7"></option>
+      <option value="8" id="idchannel8"></option>
+      <option value="9" id="idchannel9"></option>
+      <option value="10" id="idchannel10"></option>
+      <option value="11" id="idchannel11"></option>
+      <option value="12" id="idchannel12"></option>
+      <option value="13" id="idchannel13"></option>
+      <option value="14" id="idchannel14"></option>
+      <option value="15" id="idchannel15"></option>
+      <option value="16" id="idchannel16"></option>
+      <option value="17" id="idchannel17"></option>
+      <option value="18" id="idchannel18"></option>
+      <option value="19" id="idchannel19"></option>
+  		</select>
+  	</th>
+  
+      <td>
+        <input name="hour" type="number" id="days" value="1" maxlength="1" />
+     </td>
+       <td>
+         <input name="startdate" type="date" id="startdate" />
+         <input name="enddate" type="date" id="enddate" />
+         <input name="Button" type="button" onclick="LoadData()" value="Load Data" />
+       </td>
+      </tr>
+  </table>
+
+<!--<div id="VariableTable" style="text-align: center; "></div>-->
+      <!--<span id="txtAutoUpdateStatus">Loading...</span>-->
+<table width="100%" border="0">
+  <tr>
+    <td width="85%"><div id="container" style="width: 100%; height: 500px;"></div></td>
+    <td width="15%"><div id="data_table_div" style="overflow-x: hidden; height: 500px;"></div></td>
+  </tr>
+</table>
+<hr id='last_hr'>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" fgcolor="white">
+  <tr>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="left"><font size="3"><strong><font color="#0000CC">Copyright &copy; 2012-2014 DCEN.VN</font></strong></font></div>
+      </a></td>
+    <td width="50%" height="22" bgcolor="#C0C0C0"><div align="right"><font size="3"><strong><font color="#0000CC">DCEN-GPIs6.6CE-V816</font></strong></font></div></td>
+  </tr>
+</table>
+</body>
+</html>
